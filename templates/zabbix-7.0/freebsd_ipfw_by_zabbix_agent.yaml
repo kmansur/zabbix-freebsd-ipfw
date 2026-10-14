@@ -1,7 +1,7 @@
 zabbix_export:
   version: '7.0'
   template_groups:
-    - uuid: 38588046eddd4ff8bbfc58e389e6ea61
+    - uuid: a426219e75bd4bb9b2a3372a439f2c24
       name: 'Templates/Firewalls'
   templates:
     - uuid: 36c582d60d9446c0a888735b4cb9d7c1
@@ -15,7 +15,7 @@ zabbix_export:
       items:
         - uuid: 8f5959f8a2ec4ac59d5889902a5ee751
           name: 'IPFW: Collector raw JSON'
-          type: ZABBIX_ACTIVE
+          type: ZABBIX_PASSIVE
           key: ipfw.raw
           delay: 1m
           history: 1d
