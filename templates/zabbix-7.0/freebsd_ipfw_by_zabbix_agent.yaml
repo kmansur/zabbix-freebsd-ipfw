@@ -7,6 +7,9 @@ zabbix_export:
     - uuid: 36c582d60d9446c0a888735b4cb9d7c1
       template: 'FreeBSD IPFW by Zabbix Agent'
       name: 'FreeBSD IPFW by Zabbix Agent'
+      vendor:
+        name: 'Net Tech'
+        version: '1.0.0'
       description: |
         Development preview. Read-only IPFW rule counts and selected counters.
         Does NOT enumerate unique blocked IP addresses.
