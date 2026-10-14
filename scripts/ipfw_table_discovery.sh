@@ -6,6 +6,7 @@ IPFW=/sbin/ipfw
 AWK=/usr/bin/awk
 
 [ -x "$IPFW" ] && [ -x "$AWK" ] || exit 1
+# Successful empty output means zero tables. A failed command is NOT zero tables.
 output=$("$IPFW" table all info) || exit 1
 
 printf '%s\n' "$output" | "$AWK" '
