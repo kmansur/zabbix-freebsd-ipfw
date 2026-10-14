@@ -72,7 +72,7 @@ def summarize(rules, tables):
 
     # If a referenced table is missing from the supplied snapshot, counts
     # cannot be claimed complete.
-    headers = set(TABLE_HEAD.findall(tables))
+    headers = {match.groups() for line in tables.splitlines() if (match := TABLE_HEAD.match(line))}
     known_tables = {name for name, _ in headers}
     missing = sorted(refs - known_tables)
     counter = Counter(entries)
