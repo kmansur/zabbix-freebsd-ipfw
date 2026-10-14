@@ -70,3 +70,17 @@ mesmo quando nenhuma tabela estiver configurada.
 `ipfw table all info` retorne código de erro quando não existem tabelas,
 o coletor deverá distinguir explicitamente essa condição dos erros reais
 antes de considerarmos o cenário homologado.
+
+## Gráficos (versão experimental)
+
+O YAML contém gráficos de regras por ação, pacotes descartados/s,
+bytes descartados/s e quantidade de tabelas. O LLD também inclui
+um protótipo de gráfico de entradas para **cada tabela descoberta**.
+
+Em servidores sem tabelas, o LLD retorna `{"data":[]}`: os gráficos
+gerais permanecem, mas nenhum gráfico por tabela é criado.
+
+As taxas derivam da variação de contadores e podem mostrar descontinuidades
+quando os contadores forem zerados ou regras forem recriadas. A importação
+do novo YAML no frontend Zabbix 7 e a compatibilidade com 8 ainda precisam
+de homologação. Não realize merge ou release até essa validação.
