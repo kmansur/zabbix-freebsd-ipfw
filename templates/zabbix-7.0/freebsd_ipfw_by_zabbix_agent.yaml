@@ -1,0 +1,173 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 38588046eddd4ff8bbfc58e389e6ea61
+      name: 'Templates/Firewalls'
+  templates:
+    - uuid: 36c582d60d9446c0a888735b4cb9d7c1
+      template: 'FreeBSD IPFW by Zabbix Agent'
+      name: 'FreeBSD IPFW by Zabbix Agent'
+      description: |
+        Development preview. Read-only IPFW rule counts and selected counters.
+        Does NOT enumerate unique blocked IP addresses.
+      groups:
+        - name: 'Templates/Firewalls'
+      items:
+        - uuid: 8f5959f8a2ec4ac59d5889902a5ee751
+          name: 'IPFW: Collector raw JSON'
+          type: ZABBIX_ACTIVE
+          key: ipfw.raw
+          delay: 1m
+          history: 1d
+          value_type: TEXT
+          tags:
+            - tag: component
+              value: raw
+        - uuid: 43a1c9637a28466f9a2e5fb1de8abb48
+          name: 'IPFW: Collector status'
+          type: DEPENDENT
+          key: ipfw.status
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.status'
+          tags:
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 215cf7c4528d4ba094022c8b4d98131e
+              expression: 'last(/FreeBSD IPFW by Zabbix Agent/ipfw.status)=0'
+              name: 'IPFW: Collector reported a failure'
+              priority: HIGH
+        - uuid: c14e94c28fbd44a1beefddc1709e3511
+          name: 'IPFW: Total rules'
+          type: DEPENDENT
+          key: ipfw.rules.total
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rules_total'
+          tags:
+            - tag: component
+              value: rules
+        - uuid: 18bc70849f254331917809742dc3d1d3
+          name: 'IPFW: Deny rules'
+          type: DEPENDENT
+          key: ipfw.rules.deny
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rules_deny'
+          tags:
+            - tag: component
+              value: rules
+        - uuid: 4d2c41a2ba0741898219274b5be8f40a
+          name: 'IPFW: Allow rules'
+          type: DEPENDENT
+          key: ipfw.rules.allow
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rules_allow'
+          tags:
+            - tag: component
+              value: rules
+        - uuid: e1d8c63eb1964e688761c8de7bc791c2
+          name: 'IPFW: Reject rules'
+          type: DEPENDENT
+          key: ipfw.rules.reject
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.rules_reject'
+          tags:
+            - tag: component
+              value: rules
+        - uuid: 9ef35bebc3f9457e8fd8b260e1d9aab2
+          name: 'IPFW: Denied packets counter'
+          type: DEPENDENT
+          key: ipfw.deny.packets
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.deny_packets'
+          tags:
+            - tag: component
+              value: traffic
+        - uuid: 108d2785d2ee481b97fcaedb10846e11
+          name: 'IPFW: Denied bytes counter'
+          type: DEPENDENT
+          key: ipfw.deny.bytes
+          delay: '0'
+          units: B
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.deny_bytes'
+          tags:
+            - tag: component
+              value: traffic
+        - uuid: 797ac65d9e0c4c94892f5173423e1ad5
+          name: 'IPFW: Denied packet counter change per second'
+          type: DEPENDENT
+          key: ipfw.deny.pps
+          delay: '0'
+          value_type: FLOAT
+          units: '!pps'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.deny_packets'
+            - type: CHANGE_PER_SECOND
+          tags:
+            - tag: component
+              value: traffic
+        - uuid: 3c5df644425b4c9788f1e16770231af9
+          name: 'IPFW: Denied byte counter change per second'
+          type: DEPENDENT
+          key: ipfw.deny.bytes_per_second
+          delay: '0'
+          value_type: FLOAT
+          units: Bps
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.deny_bytes'
+            - type: CHANGE_PER_SECOND
+          tags:
+            - tag: component
+              value: traffic
+      triggers:
+        - uuid: 9d95bef156a94a35937aa839c2f3620c
+          expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
+          name: 'IPFW: Collector data not received for 5 minutes'
+          priority: WARNING
+      tags:
+        - tag: class
+          value: security
+        - tag: target
+          value: freebsd
