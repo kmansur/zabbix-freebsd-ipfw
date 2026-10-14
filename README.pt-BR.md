@@ -50,3 +50,23 @@ precisa ser verificada separadamente. Nenhuma operação altera o IPFW.
 
 O YAML desta branch **ainda não foi homologado** por importação no frontend
 Zabbix 7.0/8.0. Não substitua a configuração estável de produção sem homologação.
+
+## Servidores sem tabelas IPFW
+
+O uso de tabelas é **opcional**. O template deve monitorar regras e contadores
+mesmo quando nenhuma tabela estiver configurada.
+
+- `ipfw table all info` com execução bem-sucedida e saída vazia: inventário
+  vazio; `ipfw.tables.total=0`, `ipfw.tables.status=1` e descoberta
+  `{"data":[]}`. Não são criados itens dependentes de tabelas.
+- Falha do comando (erro de permissão ou falha de execução): **não** converter
+  para zero; indicar falha de coleta das tabelas.
+- Uma ou mais tabelas: descobrir todas as tabelas numéricas do tipo `addr`;
+  a coleta atual não presume a existência de tabela 40.
+- A remoção de uma tabela anteriormente descoberta deve respeitar a retenção
+  configurada na descoberta do Zabbix.
+
+É necessário validar em FreeBSD um servidor realmente sem tabelas. Caso
+`ipfw table all info` retorne código de erro quando não existem tabelas,
+o coletor deverá distinguir explicitamente essa condição dos erros reais
+antes de considerarmos o cenário homologado.
