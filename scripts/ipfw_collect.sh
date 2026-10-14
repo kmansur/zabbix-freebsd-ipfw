@@ -54,11 +54,9 @@ if table_info=$("$IPFW" table all info 2>/dev/null); then
       next
     }
     /^[[:space:]]*items:[[:space:]]*[0-9]+/ && id != "" {
-      if (id == "40") { table40=$2; seen40=1 }
     }
     END {
       printf "\"tables_status\":1,\"tables_total\":%d", tables
-      if (seen40) printf ",\"table40_entries\":%d", table40
     }
   ')
 else
