@@ -213,16 +213,7 @@ zabbix_export:
             evaltype: AND
             conditions:
               - macro: '{#TABLE_TYPE}'
-                value: '^addr
-          expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
-          name: 'IPFW: Collector data not received for 5 minutes'
-          priority: WARNING
-      tags:
-        - tag: class
-          value: security
-        - tag: target
-          value: freebsd
-
+                value: '^addr$'
                 formulaid: A
           item_prototypes:
             - uuid: 53164ce0308f4a39b40ed7a68ebd9a74
