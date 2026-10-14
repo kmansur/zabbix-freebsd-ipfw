@@ -15,7 +15,7 @@ IP addresses in IPFW tables, rule-level LLD, advanced dashboards and verified Za
 
 ## Install (test host only)
 
-1. Copy `scripts/ipfw_collect.sh` to `/usr/local/libexec/zabbix/ipfw_collect.sh` owned by root, mode 0755.
+1. Copy `scripts/ipfw_collect.sh` to `/usr/local/scripts/zabbix/ipfw_collect.sh` owned by root, mode 0755.
 2. Verify `/sbin/ipfw -a list` output and test the collector as root.
 3. Place `agent/userparameter_ipfw.conf` under the agent's included configuration directory.
 4. Provide **command-specific** privilege escalation for the Zabbix agent account if necessary; never use `NOPASSWD: ALL`.
