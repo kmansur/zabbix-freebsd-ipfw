@@ -21,7 +21,10 @@ printf '%s\n' "$output" | "$AWK" -v wanted="$table_id" '
   selected=(id == wanted)
 }
 /^[[:space:]]*items:[[:space:]]*[0-9]+/ && selected {
-  print $2
+  value=$2
+  sub(/,$/, "", value)
+  if (value !~ /^[0-9]+$/) exit 2
+  print value
   found=1
   exit
 }
