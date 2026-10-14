@@ -20,6 +20,11 @@ zabbix_export:
           delay: 1m
           history: 1d
           value_type: TEXT
+          triggers:
+            - uuid: 9d95bef156a94a35937aa839c2f3620c
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
+              name: 'IPFW: Collector data not received for 5 minutes'
+              priority: WARNING
           tags:
             - tag: component
               value: raw
@@ -228,11 +233,6 @@ zabbix_export:
                   value: tables
                 - tag: table
                   value: '{#TABLE_ID}'
-      triggers:
-        - uuid: 9d95bef156a94a35937aa839c2f3620c
-          expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
-          name: 'IPFW: Collector data not received for 5 minutes'
-          priority: WARNING
       tags:
         - tag: class
           value: security
