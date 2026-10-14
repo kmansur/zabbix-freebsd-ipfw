@@ -203,6 +203,40 @@ zabbix_export:
           tags:
             - tag: component
               value: traffic
+      discovery_rules:
+        - uuid: 8fd0794f3fbb4f8f978731ec37e3d0e1
+          name: 'IPFW: Discover address tables'
+          type: ZABBIX_PASSIVE
+          key: ipfw.tables.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#TABLE_TYPE}'
+                value: '^addr
+          expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
+          name: 'IPFW: Collector data not received for 5 minutes'
+          priority: WARNING
+      tags:
+        - tag: class
+          value: security
+        - tag: target
+          value: freebsd
+
+                formulaid: A
+          item_prototypes:
+            - uuid: 53164ce0308f4a39b40ed7a68ebd9a74
+              name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
+              type: ZABBIX_PASSIVE
+              key: 'ipfw.table.entries[{#TABLE_ID}]'
+              delay: 5m
+              history: 30d
+              trends: 365d
+              tags:
+                - tag: component
+                  value: tables
+                - tag: table
+                  value: '{#TABLE_ID}'
       triggers:
         - uuid: 9d95bef156a94a35937aa839c2f3620c
           expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
