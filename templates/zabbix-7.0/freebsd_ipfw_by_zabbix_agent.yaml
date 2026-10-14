@@ -160,20 +160,6 @@ zabbix_export:
           tags:
             - tag: component
               value: tables
-        - uuid: 91bf78b414ef405889f55c730c9d4a60
-          name: 'IPFW: Table 40 address entries'
-          type: DEPENDENT
-          key: ipfw.table40.entries
-          delay: '0'
-          master_item:
-            key: ipfw.raw
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.table40_entries'
-          tags:
-            - tag: component
-              value: tables
         - uuid: 797ac65d9e0c4c94892f5173423e1ad5
           name: 'IPFW: Denied packet counter change per second'
           type: DEPENDENT
