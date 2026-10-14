@@ -219,8 +219,55 @@ zabbix_export:
                   value: tables
                 - tag: table
                   value: '{#TABLE_ID}'
+          graph_prototypes:
+            - uuid: 99fc22a8b0cd4a61bf5ce6c3d66e07e2
+              name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'FreeBSD IPFW by Zabbix Agent'
+                    key: 'ipfw.table.entries[{#TABLE_ID}]'
       tags:
         - tag: class
           value: security
         - tag: target
           value: freebsd
+  graphs:
+    - uuid: 8c18ac182f5149c5960a6213bec44da3
+      name: 'IPFW: Firewall rules by action'
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.rules.allow
+        - sortorder: '1'
+          color: E53935
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.rules.deny
+        - sortorder: '2'
+          color: FF9800
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.rules.reject
+    - uuid: c7569aebd5f24284b34b060e26721a75
+      name: 'IPFW: Denied packets per second'
+      graph_items:
+        - color: E53935
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.deny.pps
+    - uuid: a8ff42a89bfc4c8a9f6c67d710d43ba0
+      name: 'IPFW: Denied traffic (bytes per second)'
+      graph_items:
+        - color: 1565C0
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.deny.bytes_per_second
+    - uuid: 054c57dd76094ae98fbaef10512b24a7
+      name: 'IPFW: Number of tables'
+      graph_items:
+        - color: 7E57C2
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.tables.total
