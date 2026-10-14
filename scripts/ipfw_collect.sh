@@ -45,11 +45,11 @@ END {
 
 # Optional table census: do not replace missing/failed data with zero.
 if table_info=$("$IPFW" table all info 2>/dev/null); then
-  table_metrics=$(printf '%s\\n' "$table_info" | "$AWK" '
-    /^--- table\\(/ {
+  table_metrics=$(printf '%s\n' "$table_info" | "$AWK" '
+    /^--- table\(/ {
       id=$0
-      sub(/^--- table\\(/, "", id)
-      sub(/\\).*/, "", id)
+      sub(/^--- table\(/, "", id)
+      sub(/\).*/, "", id)
       tables++
       next
     }
@@ -68,7 +68,7 @@ fi
 # Attach table metrics only to a healthy rules response.
 case "$rules_json" in
   *'"status":1'*)
-    printf '%s,%s}\\n' "${rules_json%?}" "$table_metrics"
+    printf '%s,%s}\n' "${rules_json%?}" "$table_metrics"
     ;;
-  *) printf '%s\\n' "$rules_json" ;;
+  *) printf '%s\n' "$rules_json" ;;
 esac
