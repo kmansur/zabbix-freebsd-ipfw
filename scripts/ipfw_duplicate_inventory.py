@@ -13,7 +13,7 @@ from pathlib import Path
 
 RULE = re.compile(r"^\s*\d+\s+\d+\s+\d+\s+(deny|drop|reject|reset|unreach)\b(.*)$", re.I)
 TABLE_REF = re.compile(r"\btable\((\d+)\)", re.I)
-HOST = re.compile(r"\bfrom\s+(\S+)\b", re.I)
+HOST = re.compile(r"\bfrom\s+(\S+)", re.I)
 TABLE_HEAD = re.compile(r"^--- table\((\d+)\), set\((\d+)\) ---$")
 ENTRY = re.compile(r"^(\S+)\s+\S+(?:\s+.*)?$")
 
