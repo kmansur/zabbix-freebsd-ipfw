@@ -26,3 +26,27 @@ Não é preciso Agent 2: o UserParameter também funciona no agente clássico.
 ## Próximas etapas
 
 Validar formatos reais de `ipfw -a list`, `ipfw table all list` e saídas de regras dinâmicas para implementar LLD e contagem de endereços bloqueados com semântica correta.
+
+## Descoberta automática de tabelas (branch experimental)
+
+Instale também `ipfw_table_discovery.sh` e `ipfw_table_entries.sh` em
+`/usr/local/scripts/zabbix/`, pertencentes a root:wheel, permissão 0755.
+
+O sudoers deve autorizar **somente** os três scripts de leitura do projeto, sem
+`NOPASSWD: ALL`. Para `ipfw_table_entries.sh`, permita apenas um identificador
+numérico de tabela como argumento, utilizando restrições apropriadas do sudoers.
+
+Após reiniciar o agente, teste:
+
+```sh
+/usr/local/sbin/zabbix_agentd -t ipfw.tables.discovery
+/usr/local/sbin/zabbix_agentd -t 'ipfw.table.entries[40]'
+```
+
+A descoberta atualmente suporta identificadores **numéricos** de tabelas do tipo
+`addr`. As contagens incluem entradas de rede e não equivalem automaticamente a
+IPs individuais distintos nem a bloqueios efetivos; a ação da regra associada
+precisa ser verificada separadamente. Nenhuma operação altera o IPFW.
+
+O YAML desta branch **ainda não foi homologado** por importação no frontend
+Zabbix 7.0/8.0. Não substitua a configuração estável de produção sem homologação.
