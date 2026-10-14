@@ -10,9 +10,6 @@ zabbix_export:
       vendor:
         name: 'Net Tech'
         version: '0.1.5'
-      vendor:
-        name: 'Net Tech'
-        version: '1.0.0'
       description: |
         Development preview. Read-only IPFW rule counts and selected counters.
         Does NOT enumerate unique blocked IP addresses.
