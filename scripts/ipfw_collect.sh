@@ -53,8 +53,6 @@ if table_info=$("$IPFW" table all info 2>/dev/null); then
       tables++
       next
     }
-    /^[[:space:]]*items:[[:space:]]*[0-9]+/ && id != "" {
-    }
     END {
       printf "\"tables_status\":1,\"tables_total\":%d", tables
     }
