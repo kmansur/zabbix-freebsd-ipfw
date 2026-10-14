@@ -38,7 +38,7 @@ function num(x) { return x ~ /^[0-9]+$/ }
 END {
   if (rules == 0) {
     print "{\"status\":0,\"error\":\"No parseable IPFW rules\"}"
-    exit 2
+    exit 0
   }
   printf "{\"status\":1,\"rules_total\":%d,\"rules_allow\":%d,\"rules_deny\":%d,\"rules_reject\":%d,\"deny_packets\":%.0f,\"deny_bytes\":%.0f,\"reject_packets\":%.0f,\"reject_bytes\":%.0f}\n", rules, allowed, denied, rejected, deny_packets, deny_bytes, reject_packets, reject_bytes
 }'
