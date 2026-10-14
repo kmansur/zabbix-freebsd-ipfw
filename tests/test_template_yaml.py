@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Static checks for public Zabbix template structure (not an import test)."""
+from pathlib import Path
+import unittest
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+TEMPLATE = ROOT / "templates/zabbix-7.0/freebsd_ipfw_by_zabbix_agent.yaml"
+
+class RejectDuplicateKeys(yaml.SafeLoader):
+    pass
+
+def construct_mapping(loader, node):
+    result = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=True)
+        if key in result:
+            raise ValueError(f"Duplicate YAML key: {key}")
+        result[key] = loader.construct_object(value_node, deep=True)
+    return result
+
+RejectDuplicateKeys.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
+)
+
+class TemplateChecks(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.export = yaml.load(TEMPLATE.read_text(encoding="utf-8"), Loader=RejectDuplicateKeys)
+        cls.template = cls.export["zabbix_export"]["templates"][0]
+
+    def test_metadata(self):
+        self.assertEqual(self.export["zabbix_export"]["version"], "7.0")
+        self.assertEqual(self.template["vendor"], {"name": "Net Tech", "version": "0.1.5"})
+
+    def test_no_template_level_triggers(self):
+        self.assertNotIn("triggers", self.template)
+
+    def test_no_fixed_table_identifier(self):
+        keys = [x["key"] for x in self.template.get("items", [])]
+        self.assertFalse(any("table40" in key for key in keys))
+        rules = self.template["discovery_rules"]
+        self.assertEqual(len(rules), 1)
+        self.assertEqual(rules[0]["item_prototypes"][0]["key"],
+                         "ipfw.table.entries[{#TABLE_ID}]")
+        self.assertTrue(rules[0].get("graph_prototypes"))
+
+    def test_graphs(self):
+        self.assertGreaterEqual(len(self.export["zabbix_export"].get("graphs", [])), 4)
+
+    def test_public_content(self):
+        text = TEMPLATE.read_text(encoding="utf-8").lower()
+        for prohibited in ("torsk", "copernicus"):
+            self.assertNotIn(prohibited, text)
+
+if __name__ == "__main__":
+    unittest.main()
