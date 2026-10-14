@@ -35,8 +35,8 @@ No individual addresses should be sent to Zabbix; report counts only.
 
 ## Required fixtures before integration
 
-- No tables (COPERNICUS).
-- One address table plus individual deny rules (TORSK).
+- No tables (generic FreeBSD test fixture).
+- One address table plus individual deny rules (generic FreeBSD test fixture).
 - Multiple tables 10/20/30/40, with duplicates across tables.
 - Duplicate addresses between rules and tables.
 - IPv4 /32 and IPv6 /128, plus prefixes.
