@@ -45,6 +45,27 @@ class TemplateChecks(unittest.TestCase):
                          "ipfw.table.entries[{#TABLE_ID}]")
         self.assertTrue(rules[0].get("graph_prototypes"))
 
+    def test_inventory_item_dependencies(self):
+        items = {item["key"]: item for item in self.template["items"]}
+        self.assertEqual(items["ipfw.inventory.raw"]["delay"], "5m")
+        mapping = {
+            "ipfw.inventory.status": "$.status",
+            "ipfw.inventory.host.unique": "$.host_unique",
+            "ipfw.inventory.host.occurrences": "$.host_occurrences",
+            "ipfw.inventory.host.duplicates": "$.host_duplicate_extra",
+        }
+        for key, path in mapping.items():
+            item = items[key]
+            self.assertEqual(item["type"], "DEPENDENT")
+            self.assertEqual(item["master_item"]["key"], "ipfw.inventory.raw")
+            self.assertEqual(item["preprocessing"][0]["parameters"][0], path)
+
+    def test_all_graph_items_reference_existing_keys(self):
+        keys = {item["key"] for item in self.template["items"]}
+        for graph in self.export["zabbix_export"].get("graphs", []):
+            for graph_item in graph["graph_items"]:
+                self.assertIn(graph_item["item"]["key"], keys)
+
     def test_graphs(self):
         self.assertGreaterEqual(len(self.export["zabbix_export"].get("graphs", [])), 4)
 
