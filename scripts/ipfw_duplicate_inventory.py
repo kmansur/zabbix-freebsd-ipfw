@@ -75,11 +75,15 @@ def summarize(rules, tables):
     headers = {match.groups() for line in tables.splitlines() if (match := TABLE_HEAD.match(line))}
     known_tables = {name for name, _ in headers}
     missing = sorted(refs - known_tables)
+    # Numeric table references are ambiguous when the same ID exists in
+    # multiple sets; decline to publish potentially inaccurate totals.
+    ambiguous = sorted(name for name in refs
+                       if sum(1 for table_id, _ in headers if table_id == name) > 1)
     counter = Counter(entries)
     hosts = {value: n for (kind, value), n in counter.items() if kind == "host"}
     prefixes = {value: n for (kind, value), n in counter.items() if kind == "prefix"}
     return {
-        "status": 1 if not missing and unsupported == 0 else 0,
+        "status": 1 if not missing and not ambiguous and unsupported == 0 else 0,
         "host_occurrences": sum(hosts.values()),
         "host_unique": len(hosts),
         "host_duplicate_extra": sum(v - 1 for v in hosts.values()),
@@ -89,6 +93,7 @@ def summarize(rules, tables):
         "prefix_duplicate_extra": sum(v - 1 for v in prefixes.values()),
         "referenced_tables": len(refs),
         "missing_referenced_tables": len(missing),
+        "ambiguous_referenced_tables": len(ambiguous),
         "unsupported_sources": unsupported,
     }
 
