@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3.12
 """Read-only aggregate IPFW blocked-address inventory for Zabbix.
 
 No raw IP address is emitted. Requires Python 3 and permission to read IPFW.
