@@ -197,6 +197,77 @@ zabbix_export:
           tags:
             - tag: component
               value: traffic
+        - uuid: fda8b01fbe9644a295d1df56a730c4bb
+          name: 'IPFW: Blocked address inventory JSON'
+          type: ZABBIX_PASSIVE
+          key: ipfw.inventory.raw
+          delay: 5m
+          history: 1d
+          value_type: TEXT
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 22e5a165c2af416cb260d58dd9ee390e
+          name: 'IPFW: Blocked address inventory status'
+          type: DEPENDENT
+          key: ipfw.inventory.status
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.status'
+          tags:
+            - tag: component
+              value: inventory
+          triggers:
+            - uuid: cb264056c6f34265b8094eb0a042e05c
+              expression: 'last(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.status)=0'
+              name: 'IPFW: Blocked address inventory incomplete'
+              priority: WARNING
+        - uuid: 90146ae0d43649e687581ce7106d4e98
+          name: 'IPFW: Unique blocked host addresses'
+          type: DEPENDENT
+          key: ipfw.inventory.host.unique
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.host_unique'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 65b09e285ab94a6495b9e264d1ad9a5e
+          name: 'IPFW: Duplicate blocked host occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.host.duplicates
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.host_duplicate_extra'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 2d5f180dc91144efab1c9a04779185c1
+          name: 'IPFW: Blocked host occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.host.occurrences
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.host_occurrences'
+          tags:
+            - tag: component
+              value: inventory
       discovery_rules:
         - uuid: 8fd0794f3fbb4f8f978731ec37e3d0e1
           name: 'IPFW: Discover address tables'
