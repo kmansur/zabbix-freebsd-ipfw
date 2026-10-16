@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Offline IPFW blocked-host inventory, exact duplicates only.
+"""Conservative read-only IPFW blocked-address inventory.
 
-Reads existing command output from files/stdin. Never modifies firewall state.
-Conservative parser: reports incomplete input rather than misleading totals.
+Only aggregated host/prefix counts leave this module. The parser supports
+numeric source tables with explicit headers and literal source IP/CIDR rules.
+Unknown rule/source/table syntax fails closed (status=0).
 """
 import argparse
 import ipaddress
@@ -12,98 +13,110 @@ from collections import Counter
 from pathlib import Path
 
 RULE = re.compile(r"^\s*\d+\s+\d+\s+\d+\s+(deny|drop|reject|reset|unreach)\b(.*)$", re.I)
-TABLE_REF = re.compile(r"\btable\((\d+)\)", re.I)
-HOST = re.compile(r"\bfrom\s+(\S+)", re.I)
+SOURCE = re.compile(r"\bfrom\s+(\S+)\s+to\s+", re.I)
+TABLE_REF = re.compile(r"^table\((\d+)\)$", re.I)
 TABLE_HEAD = re.compile(r"^--- table\((\d+)\), set\((\d+)\) ---$")
-ENTRY = re.compile(r"^(\S+)\s+\S+(?:\s+.*)?$")
+HOST_OR_PREFIX = re.compile(r"^([^\s]+)(?:\s+.*)?$")
+SKIP_SOURCE = frozenset({"any", "me"})
+# Option keywords which may occur between action and protocol; the actual
+# FROM clause is parsed separately, after the action has been identified.
+
 
 def normalize(token):
     try:
-        ip = ipaddress.ip_network(token, strict=False)
+        network = ipaddress.ip_network(token, strict=False)
     except ValueError:
         return None
-    if ip.prefixlen != ip.max_prefixlen:
-        return ("prefix", str(ip))
-    return ("host", str(ip.network_address))
+    if network.prefixlen == network.max_prefixlen:
+        return ("host", str(network.network_address))
+    return ("prefix", str(network))
+
 
 def summarize(rules, tables):
-    refs = set()
+    references = set()
     entries = []
     unsupported = 0
+
     for line in rules.splitlines():
-        m = RULE.match(line)
-        if not m:
+        match = RULE.match(line)
+        if not match:
             continue
-        rest = m.group(2)
-        refs.update(TABLE_REF.findall(rest))
-        source = HOST.search(rest)
-        if not source:
+        source = SOURCE.search(match.group(2))
+        if source is None:
             unsupported += 1
             continue
         token = source.group(1)
-        if token.startswith("table("):
+        table_ref = TABLE_REF.fullmatch(token)
+        if table_ref:
+            references.add(table_ref.group(1))
+        elif token.lower() in SKIP_SOURCE:
             continue
-        if token.lower() in ("any", "me"):
-            continue
-        parsed = normalize(token)
-        if parsed:
-            entries.append(parsed)
         else:
-            unsupported += 1
+            value = normalize(token)
+            if value is None:
+                unsupported += 1
+            else:
+                entries.append(value)
 
+    headers = set()
     current = None
-    seen = set()
+    parsed_tables = {}
     for line in tables.splitlines():
-        m = TABLE_HEAD.match(line)
-        if m:
-            current = m.group(1)
+        stripped = line.strip()
+        header = TABLE_HEAD.fullmatch(stripped)
+        if header:
+            current = header.groups()
+            headers.add(current)
+            parsed_tables.setdefault(current, [])
             continue
-        if not line.strip():
+        if not stripped:
             continue
-        if current not in refs:
-            continue
-        match = ENTRY.match(line)
-        parsed = normalize(match.group(1)) if match else None
-        if parsed:
-            entries.append(parsed)
-            seen.add(current)
-        else:
+        if current is None:
+            # A nonempty, non-header table listing cannot safely be decoded.
             unsupported += 1
+            continue
+        token = stripped.split()[0]
+        value = normalize(token)
+        if value is None:
+            unsupported += 1
+        else:
+            parsed_tables[current].append(value)
 
-    # If a referenced table is missing from the supplied snapshot, counts
-    # cannot be claimed complete.
-    headers = {match.groups() for line in tables.splitlines() if (match := TABLE_HEAD.match(line))}
-    known_tables = {name for name, _ in headers}
-    missing = sorted(refs - known_tables)
-    # Numeric table references are ambiguous when the same ID exists in
-    # multiple sets; decline to publish potentially inaccurate totals.
-    ambiguous = sorted(name for name in refs
-                       if sum(1 for table_id, _ in headers if table_id == name) > 1)
-    counter = Counter(entries)
-    hosts = {value: n for (kind, value), n in counter.items() if kind == "host"}
-    prefixes = {value: n for (kind, value), n in counter.items() if kind == "prefix"}
+    known_ids = {ident for ident, _ in headers}
+    missing = references - known_ids
+    ambiguous = {ident for ident in references
+                 if sum(ident == x for x, _ in headers) > 1}
+    for (ident, _set), values in parsed_tables.items():
+        if ident in references:
+            entries.extend(values)
+
+    counts = Counter(entries)
+    host = {v: n for (kind, v), n in counts.items() if kind == "host"}
+    prefix = {v: n for (kind, v), n in counts.items() if kind == "prefix"}
     return {
-        "status": 1 if not missing and not ambiguous and unsupported == 0 else 0,
-        "host_occurrences": sum(hosts.values()),
-        "host_unique": len(hosts),
-        "host_duplicate_extra": sum(v - 1 for v in hosts.values()),
-        "host_duplicated_values": sum(v > 1 for v in hosts.values()),
-        "prefix_occurrences": sum(prefixes.values()),
-        "prefix_unique": len(prefixes),
-        "prefix_duplicate_extra": sum(v - 1 for v in prefixes.values()),
-        "referenced_tables": len(refs),
+        "status": int(not (missing or ambiguous or unsupported)),
+        "host_occurrences": sum(host.values()),
+        "host_unique": len(host),
+        "host_duplicate_extra": sum(n - 1 for n in host.values()),
+        "host_duplicated_values": sum(n > 1 for n in host.values()),
+        "prefix_occurrences": sum(prefix.values()),
+        "prefix_unique": len(prefix),
+        "prefix_duplicate_extra": sum(n - 1 for n in prefix.values()),
+        "referenced_tables": len(references),
         "missing_referenced_tables": len(missing),
         "ambiguous_referenced_tables": len(ambiguous),
         "unsupported_sources": unsupported,
     }
 
+
 def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--rules-file", required=True, type=Path)
-    ap.add_argument("--tables-file", required=True, type=Path)
-    args = ap.parse_args()
-    result = summarize(args.rules_file.read_text(), args.tables_file.read_text())
-    print(json.dumps(result, separators=(",", ":")))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--rules-file", required=True, type=Path)
+    parser.add_argument("--tables-file", required=True, type=Path)
+    args = parser.parse_args()
+    print(json.dumps(summarize(args.rules_file.read_text(), args.tables_file.read_text()),
+                     separators=(",", ":")))
+
 
 if __name__ == "__main__":
     main()
