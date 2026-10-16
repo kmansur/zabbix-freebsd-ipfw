@@ -22,7 +22,8 @@ def collect():
     if result["status"] != 1:
         return {"status": 0, "error": "Incomplete IPFW inventory; inspect parser support",
                 "unsupported_sources": result["unsupported_sources"],
-                "missing_referenced_tables": result["missing_referenced_tables"]}
+                "missing_referenced_tables": result["missing_referenced_tables"],
+                "ambiguous_referenced_tables": result["ambiguous_referenced_tables"]}
     return {"status": 1, **result}
 
 
