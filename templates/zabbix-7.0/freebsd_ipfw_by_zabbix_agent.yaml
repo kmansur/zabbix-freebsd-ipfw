@@ -345,3 +345,15 @@ zabbix_export:
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.tables.total
+    - uuid: 5b0b0e8a631a4fa39307831312a8ad35
+      name: 'IPFW: Blocked host addresses and duplicates'
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.host.unique
+        - sortorder: '1'
+          color: E53935
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.host.duplicates
