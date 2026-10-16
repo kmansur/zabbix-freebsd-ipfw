@@ -84,3 +84,34 @@ As taxas derivam da variação de contadores e podem mostrar descontinuidades
 quando os contadores forem zerados ou regras forem recriadas. A importação
 do novo YAML no frontend Zabbix 7 e a compatibilidade com 8 ainda precisam
 de homologação. Não realize merge ou release até essa validação.
+
+## Inventário agregado (experimental, opcional)
+
+O inventário identifica endereços de origem individuais bloqueados por regras
+`deny`, `drop`, `reject`, `reset` e `unreach`, e entradas de tabelas
+numéricas efetivamente referenciadas nessas regras. Não publica endereços:
+somente números agregados. Prefixos de rede são medidos separadamente de hosts.
+
+Dependência adicional: Python 3, exclusivamente para este coletor.
+Instale `scripts/ipfw_duplicate_inventory.py` e `scripts/ipfw_inventory_collect.py`
+em `/usr/local/scripts/zabbix/` como `root:wheel`, com permissão 0755.
+A instalação requer o interpretador `/usr/local/bin/python3`.
+
+Autorize no sudoers exclusivamente:
+`zabbix ALL=(root) NOPASSWD: /usr/local/scripts/zabbix/ipfw_inventory_collect.py`.
+Não permita a execução geral do interpretador Python pelo sudoers.
+
+Após atualizar os UserParameters e reiniciar o agente, valide:
+```sh
+su -m zabbix -c '/usr/local/bin/sudo -n /usr/local/scripts/zabbix/ipfw_inventory_collect.py'
+/usr/local/sbin/zabbix_agentd -t ipfw.inventory.raw
+```
+
+O item `ipfw.inventory.raw` é coletado a cada 5 minutos. Em caso de
+`status=0`, as contagens consolidadas não devem ser interpretadas como
+completas. O parser rejeita referências ambíguas em diferentes sets; suporte
+para tabelas nomeadas, sintaxes IPFW complexas e comportamento real em
+servidores com múltiplos sets ainda precisa de homologação.
+
+**Não instale em produção antes de validar o parser e a importação dos novos
+itens no laboratório.** O recurso não modifica o firewall.
