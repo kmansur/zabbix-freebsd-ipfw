@@ -95,11 +95,13 @@ somente números agregados. Prefixos de rede são medidos separadamente de hosts
 Dependência adicional: Python 3, exclusivamente para este coletor.
 Instale `scripts/ipfw_duplicate_inventory.py` e `scripts/ipfw_inventory_collect.py`
 em `/usr/local/scripts/zabbix/` como `root:wheel`, com permissão 0755.
-A instalação requer o interpretador `/usr/local/bin/python3`.
+A instalação requer Python 3.12 (ou ajuste explícito do interpretador no cabeçalho do script para a versão instalada). No FreeBSD, o pacote `python312` pode fornecer somente `/usr/local/bin/python3.12`; não é obrigatório criar links simbólicos.
 
 Autorize no sudoers exclusivamente:
 `zabbix ALL=(root) NOPASSWD: /usr/local/scripts/zabbix/ipfw_inventory_collect.py`.
 Não permita a execução geral do interpretador Python pelo sudoers.
+
+Antes de alterar o agente, valide o sudoers com `visudo -cf /usr/local/etc/sudoers.d/zabbix-ipfw` e faça o teste de execução como usuário `zabbix`. O arquivo de exemplo `agent/userparameter_ipfw.conf` contém a chave nova, mas é preciso adicioná-la ao arquivo de configuração ativo do agente (sem duplicar UserParameters). Reinicie o agente somente após validar a configuração.
 
 Após atualizar os UserParameters e reiniciar o agente, valide:
 ```sh
