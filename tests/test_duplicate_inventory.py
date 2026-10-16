@@ -64,6 +64,28 @@ class DuplicateInventoryTests(unittest.TestCase):
         self.assertEqual(r["host_unique"], 0)
         self.assertEqual(r["prefix_unique"], 1)
 
+    def test_destination_table_does_not_count_as_blocked_source(self):
+        r = summarize("00100 1 1 deny ip from 192.0.2.10 to table(20)\n", "")
+        self.assertEqual(r["status"], 1)
+        self.assertEqual(r["missing_referenced_tables"], 0)
+        self.assertEqual(r["host_unique"], 1)
+
+    def test_unknown_table_listing_fails_closed(self):
+        r = summarize("00100 1 1 deny ip from table(20) to me\n",
+                      "unexpected output\n")
+        self.assertEqual(r["status"], 0)
+        self.assertGreater(r["unsupported_sources"], 0)
+
+    def test_unknown_rule_source_fails_closed(self):
+        r = summarize("00100 1 1 deny ip from not-an-ip to me\n", "")
+        self.assertEqual(r["status"], 0)
+
+    def test_unused_table_not_counted(self):
+        r = summarize("00100 1 1 deny ip from 192.0.2.10 to me\n",
+                      "--- table(20), set(0) ---\n198.51.100.10/32 0\n")
+        self.assertEqual(r["status"], 1)
+        self.assertEqual(r["host_unique"], 1)
+
     def test_prefix_not_a_host(self):
         r = summarize("01000 1 1 deny ip from 192.0.2.0/24 to me", "")
         self.assertEqual(r["host_unique"], 0)
