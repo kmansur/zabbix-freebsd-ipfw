@@ -50,6 +50,20 @@ class DuplicateInventoryTests(unittest.TestCase):
         self.assertEqual(r["host_unique"], 2)
         self.assertEqual(r["host_duplicate_extra"], 0)
 
+    def test_same_table_id_different_sets_is_incomplete(self):
+        rules = "00100 1 1 deny ip from table(10) to me\n"
+        tables = ("--- table(10), set(0) ---\n192.0.2.1/32 0\n"
+                  "--- table(10), set(1) ---\n198.51.100.1/32 0\n")
+        r = summarize(rules, tables)
+        self.assertEqual(r["status"], 0)
+        self.assertEqual(r["ambiguous_referenced_tables"], 1)
+
+    def test_ipv6_prefix_is_not_host(self):
+        r = summarize("01000 1 1 deny ip from 2001:db8::/64 to me\n", "")
+        self.assertEqual(r["status"], 1)
+        self.assertEqual(r["host_unique"], 0)
+        self.assertEqual(r["prefix_unique"], 1)
+
     def test_prefix_not_a_host(self):
         r = summarize("01000 1 1 deny ip from 192.0.2.0/24 to me", "")
         self.assertEqual(r["host_unique"], 0)
