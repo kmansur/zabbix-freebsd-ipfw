@@ -42,7 +42,7 @@ class TemplateChecks(unittest.TestCase):
         rules = self.template["discovery_rules"]
         self.assertEqual(len(rules), 1)
         self.assertEqual(rules[0]["item_prototypes"][0]["key"],
-                         "ipfw.table.entries[{#TABLE_ID}]")
+                         "ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]")
         self.assertTrue(rules[0].get("graph_prototypes"))
 
     def test_inventory_item_dependencies(self):
