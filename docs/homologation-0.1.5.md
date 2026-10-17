@@ -43,3 +43,12 @@ Tabelas nomeadas e múltiplos sets ainda precisam de compatibilidade e evidênci
 Caso a atualização falhe, restaure o template anterior, remova somente o novo
 UserParameter `ipfw.inventory.raw` e reinicie o agente. Remover os dois scripts
 Python opcionais não afeta os coletores shell originais.
+
+## Limitação de tabelas por set (proteção adicional)
+
+A contagem de entradas por ID numérico recusa IDs repetidos em sets diferentes
+(retorna erro em vez de escolher arbitrariamente uma tabela). A descoberta LLD
+continua fornecendo ID e set, mas o item prototype utiliza somente o ID:
+portanto esse cenário ainda NÃO está coberto para descoberta automática.
+Deve ser testado antes da homologação e requer chave composta (ID/set) com
+seleção inequívoca da tabela, ou exclusão explícita das IDs ambíguas.
