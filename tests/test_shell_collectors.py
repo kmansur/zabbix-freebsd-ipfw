@@ -41,6 +41,15 @@ class ShellCollectors(unittest.TestCase):
         self.assertNotEqual(self.execute(DISCOVERY, data).returncode, 0)
         self.assertNotEqual(self.execute(COUNT, data, ("10",)).returncode, 0)
 
+    def test_malformed_discovery_does_not_claim_zero_tables(self):
+        result = self.execute(DISCOVERY, "unexpected malformed output")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn('{"data":[]}', result.stdout)
+
+    def test_incomplete_table_metadata_is_rejected(self):
+        result = self.execute(DISCOVERY, "--- table(10), set(0) ---\\nitems: 3,")
+        self.assertNotEqual(result.returncode, 0)
+
     def test_unique_table_entries(self):
         data = "--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
         result = self.execute(COUNT, data, ("10",))
