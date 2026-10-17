@@ -9,11 +9,11 @@ if [ "$#" -eq 2 ]; then
 else
   wanted_set=""
 fi
-case "$1" in ''|*[!0-9]*) exit 2 ;; esac
+case "$1" in ''|*[!a-zA-Z0-9_.-]*) exit 2 ;; esac
 output=$(/sbin/ipfw table all info) || exit 1
 printf '%s\n' "$output" | /usr/bin/awk -v wanted="$1" -v wanted_set="$wanted_set" '
 /^--- table\(/ {
-  if ($0 !~ /^--- table\([0-9]+\), set\([0-9]+\) ---$/) {
+  if ($0 !~ /^--- table\([a-zA-Z0-9_.-]+\), set\([0-9]+\) ---$/) {
     invalid=1
     selected=0
     next
