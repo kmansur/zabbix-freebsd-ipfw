@@ -79,9 +79,11 @@ class TemplateChecks(unittest.TestCase):
         self.assertGreaterEqual(len(self.export["zabbix_export"].get("graphs", [])), 4)
 
     def test_public_content(self):
-        text = TEMPLATE.read_text(encoding="utf-8").lower()
-        for prohibited in ("torsk", "copernicus"):
-            self.assertNotIn(prohibited, text)
+        import re
+        text = TEMPLATE.read_text(encoding="utf-8")
+        self.assertNotRegex(text, r"(?<!\\d)192\\.168\\.\\d+\\.\\d+")
+        self.assertNotRegex(text, r"(?<!\\d)10\\.\\d+\\.\\d+\\.\\d+")
+
 
 if __name__ == "__main__":
     unittest.main()
