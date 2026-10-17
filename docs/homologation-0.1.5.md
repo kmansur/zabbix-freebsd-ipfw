@@ -36,7 +36,7 @@ O inventário mede ocorrências textuais de fontes de bloqueio e tabelas referen
 não o conjunto exato de IPs efetivamente bloqueados por toda a semântica do IPFW.
 Não tenta inferir sobreposição de prefixos, precedência de regras, NAT, interfaces
 ou intersecção de políticas. O parser marca entradas não reconhecidas como incompletas.
-Tabelas nomeadas e múltiplos sets ainda precisam de compatibilidade e evidência reais.
+Tabelas nomeadas simples e sets distintos têm suporte implementado em LLD e contadores, ainda sem evidência de homologação real. No inventário agregado, referências ambíguas entre sets continuam sinalizadas como incompletas.
 
 ## Rollback
 
@@ -67,3 +67,11 @@ de sintaxes reais de IPFW em FreeBSD ainda requer homologação.
 ## Tabelas nomeadas
 
 O LLD e o contador aceitam nomes simples de tabelas com caracteres ASCII alfanuméricos, ponto, hífen e sublinhado. Outros identificadores são rejeitados, em vez de interpolados nos comandos. O inventário de endereços bloqueados reconhece referências `table(nome)` com essa mesma restrição; sintaxes complexas continuam sinalizadas como incompletas. Antes da homologação, valide os formatos reais das saídas no FreeBSD de laboratório.\n
+## Prefixos CIDR
+
+O template possui itens dependentes para `ipfw.inventory.prefix.unique`,
+`ipfw.inventory.prefix.occurrences` e `ipfw.inventory.prefix.duplicates`,
+além de gráfico separado de hosts. Prefixos /24 e /32 não são
+intercambiáveis: o inventário **não** expande intervalos e não calcula
+sobreposição de redes; duplicidade é somente a repetição exata do mesmo
+prefixo após normalização.
