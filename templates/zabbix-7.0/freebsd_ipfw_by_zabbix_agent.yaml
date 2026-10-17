@@ -204,6 +204,11 @@ zabbix_export:
           delay: 5m
           history: 1d
           value_type: TEXT
+          triggers:
+            - uuid: 83b4c5f7705c47e8b5b87759e64368dc
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,15m)=1'
+              name: 'IPFW: Blocked address inventory not received for 15 minutes'
+              priority: WARNING
           tags:
             - tag: component
               value: inventory
