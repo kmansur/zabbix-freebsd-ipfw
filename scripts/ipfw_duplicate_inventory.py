@@ -14,8 +14,8 @@ from pathlib import Path
 
 RULE = re.compile(r"^\s*\d+\s+\d+\s+\d+\s+(deny|drop|reject|reset|unreach)\b(.*)$", re.I)
 SOURCE = re.compile(r"\bfrom\s+(\S+)\s+to\s+", re.I)
-TABLE_REF = re.compile(r"^table\((\d+)\)$", re.I)
-TABLE_HEAD = re.compile(r"^--- table\((\d+)\), set\((\d+)\) ---$")
+TABLE_REF = re.compile(r"^table\(([a-zA-Z0-9_.-]+)\)$", re.I)
+TABLE_HEAD = re.compile(r"^--- table\(([a-zA-Z0-9_.-]+)\), set\((\d+)\) ---$")
 HOST_OR_PREFIX = re.compile(r"^([^\s]+)(?:\s+.*)?$")
 SKIP_SOURCE = frozenset({"any", "me"})
 # Option keywords which may occur between action and protocol; the actual
