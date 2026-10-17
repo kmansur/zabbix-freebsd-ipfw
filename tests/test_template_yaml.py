@@ -102,8 +102,20 @@ class TemplateChecks(unittest.TestCase):
     def test_public_content(self):
         import re
         text = TEMPLATE.read_text(encoding="utf-8")
-        self.assertNotRegex(text, r"(?<!\\d)192\\.168\\.\\d+\\.\\d+")
-        self.assertNotRegex(text, r"(?<!\\d)10\\.\\d+\\.\\d+\\.\\d+")
+        self.assertNotRegex(text, r"\b192\.168\.\d{1,3}\.\d{1,3}\b")
+        self.assertNotRegex(text, r"\b10\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
+        self.assertNotRegex(text, r"\b172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}\b")
+
+    def test_privacy_regex_detects_private_examples(self):
+        import re
+        patterns = [
+            r"\b192\.168\.\d{1,3}\.\d{1,3}\b",
+            r"\b10\.\d{1,3}\.\d{1,3}\.\d{1,3}\b",
+            r"\b172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}\b",
+        ]
+        fixtures = ["192.168.2.1", "10.8.5.4", "172.20.1.10"]
+        for pattern, fixture in zip(patterns, fixtures):
+            self.assertIsNotNone(re.search(pattern, fixture))
 
 
 if __name__ == "__main__":
