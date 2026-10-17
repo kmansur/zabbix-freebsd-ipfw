@@ -22,10 +22,10 @@ else
 fi
 
 for name in ipfw_collect.sh ipfw_table_discovery.sh ipfw_table_entries.sh ipfw_inventory_collect.py ipfw_duplicate_inventory.py; do
-    if [ -f "$SCRIPT_DIR/$name" ] && [ -x "$SCRIPT_DIR/$name" ] && [ ! -w "$SCRIPT_DIR/$name" ]; then
-        ok "script installed and executable: $name"
+    if [ -f "$SCRIPT_DIR/$name" ] && [ -x "$SCRIPT_DIR/$name" ] && [ "$(stat -f %Su "$SCRIPT_DIR/$name" 2>/dev/null)" = "root" ]; then
+        ok "root-owned executable: $name"
     else
-        bad "script missing, nonexecutable or writable: $name"
+        bad "script missing, nonexecutable or not owned by root: $name"
     fi
 done
 
