@@ -67,7 +67,7 @@ class ShellCollectors(unittest.TestCase):
 
     def test_reject_malformed_table_header_in_count(self):
         data = ("--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
-                "--- table(unexpected), set(1) ---\nitems: 99,\n")
+                "--- table(invalid name), set(1) ---\nitems: 99,\n")
         result = self.execute(COUNT, data, ("10", "0"))
         self.assertNotEqual(result.returncode, 0)
 
@@ -75,6 +75,17 @@ class ShellCollectors(unittest.TestCase):
         data = "--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
         self.assertNotEqual(self.execute(COUNT, data, ("10", "1;id")).returncode, 0)
         self.assertNotEqual(self.execute(COUNT, data, ("10;id", "0")).returncode, 0)
+
+    def test_named_table_and_set(self):
+        import json
+        data = ("--- table(blocklist), set(0) ---\nkindex: type: addr\nitems: 7,\n"
+                "--- table(blocklist), set(1) ---\nkindex: type: addr\nitems: 9,\n")
+        found = self.execute(DISCOVERY, data)
+        self.assertEqual(found.returncode, 0, found.stderr)
+        self.assertEqual(len(json.loads(found.stdout)["data"]), 2)
+        self.assertEqual(self.execute(COUNT, data, ("blocklist", "0")).stdout.strip(), "7")
+        self.assertEqual(self.execute(COUNT, data, ("blocklist", "1")).stdout.strip(), "9")
+        self.assertNotEqual(self.execute(COUNT, data, ("blocklist",)).returncode, 0)
 
     def test_unique_table_entries(self):
         data = "--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
