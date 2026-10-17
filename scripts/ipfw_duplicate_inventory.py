@@ -64,6 +64,10 @@ def summarize(rules, tables):
     for line in tables.splitlines():
         stripped = line.strip()
         header = TABLE_HEAD.fullmatch(stripped)
+        if stripped.startswith("--- table(") and header is None:
+            unsupported += 1
+            current = None
+            continue
         if header:
             current = header.groups()
             headers.add(current)
