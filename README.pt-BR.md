@@ -117,3 +117,12 @@ servidores com múltiplos sets ainda precisa de homologação.
 
 **Não instale em produção antes de validar o parser e a importação dos novos
 itens no laboratório.** O recurso não modifica o firewall.
+
+## Descoberta com sets diferentes (v0.1.5)
+
+A chave dos novos protótipos é `ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]`,
+para diferenciar tabelas numéricas com o mesmo ID e sets distintos.
+Adicione o UserParameter `ipfw.table.set.entries[*]` do arquivo `agent/userparameter_ipfw.conf`
+e autorize o script com dois parâmetros numéricos no sudoers antes de importar
+este YAML. Consulte `docs/homologation-0.1.5.md` para o exemplo e as ressalvas.
+A chave anterior `ipfw.table.entries[*]` permanece disponível para compatibilidade.
