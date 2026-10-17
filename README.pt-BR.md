@@ -1,128 +1,55 @@
 # FreeBSD IPFW by Zabbix Agent
 
-Projeto de monitoramento IPFW para Zabbix 7.0; compatibilidade com Zabbix 8.0 ainda precisa de homologação.
+Template experimental de monitoramento **somente leitura** do firewall IPFW para Zabbix 7.0. Vendor **Net Tech**, versão **0.1.5**. A importação no Zabbix 8 e os testes em FreeBSD real ainda dependem de homologação.
 
-**Estado: versão de desenvolvimento, não homologada para produção.**
+## Escopo
 
-## Implementado inicialmente
+- Métricas de regras e contadores de tráfego via `ipfw.raw`.
+- Descoberta LLD de tabelas de endereço (`addr`) por **identificador/nome e set**, incluindo IDs iguais em sets diferentes.
+- Contagem de entradas em cada tabela e protótipos de gráficos.
+- Inventário agregado de hosts IPv4/IPv6 bloqueados e prefixos CIDR, com valores únicos, ocorrências e duplicatas exatas.
+- Alertas de falha ou ausência da coleta.
 
-- Coletor somente leitura de regras IPFW e contadores de pacotes/bytes.
-- Uma chave `ipfw.raw` com resposta JSON.
-- Template de teste com itens dependentes, taxas e triggers básicas.
+O inventário **não calcula o conjunto efetivamente bloqueado** levando em conta precedência, interseção de regras, sobreposição CIDR, NAT ou interfaces. Quando a saída do IPFW não pode ser interpretada com segurança, o coletor sinaliza `status=0` em vez de publicar contagens parciais.
 
-**Importante:** quantidade de regras `deny` não equivale à quantidade de IPs bloqueados. O coletor inicial não conta endereços de tabelas IPFW.
+## Instalação apenas em laboratório
 
-## Instalação em laboratório
+Os scripts de `scripts/` utilizados pelo agente devem ser instalados em `/usr/local/scripts/zabbix/`, pertencentes a `root:wheel` e com modo 0755, sem permissão de gravação pelo usuário do Zabbix. O arquivo `agent/userparameter_ipfw.conf` deve ser colocado no diretório **efetivamente incluído** pelo agente, sem duplicar chaves existentes.
 
-1. Copie `scripts/ipfw_collect.sh` para `/usr/local/scripts/zabbix/ipfw_collect.sh`, como `root:wheel`, permissão 0755.
-2. Execute `/usr/local/scripts/zabbix/ipfw_collect.sh` como root e confira o JSON.
-3. Instale `agent/userparameter_ipfw.conf` no diretório incluído na configuração do agente.
-4. Se necessário, use sudoers limitado **somente** ao script, protegido contra escrita pelo usuário zabbix.
-5. Reinicie o agente e teste a chave `ipfw.raw` remotamente.
-6. Importe o YAML no Zabbix 7.0 de laboratório.
+São necessários os coletores:
 
-Não é preciso Agent 2: o UserParameter também funciona no agente clássico.
+- `ipfw_collect.sh`
+- `ipfw_table_discovery.sh`
+- `ipfw_table_entries.sh`
+- `ipfw_inventory_collect.py` e `ipfw_duplicate_inventory.py`
 
-## Próximas etapas
+O inventário requer Python 3 acessível via shebang `/usr/bin/env python3` no ambiente de execução do sudo. Se FreeBSD expuser somente o executável versionado (por exemplo, `/usr/local/bin/python3.12`), ajuste o shebang **para o caminho absoluto correto** no host de laboratório antes de conceder acesso no sudoers. Não é obrigatório criar links simbólicos.
 
-Validar formatos reais de `ipfw -a list`, `ipfw table all list` e saídas de regras dinâmicas para implementar LLD e contagem de endereços bloqueados com semântica correta.
+Conceda apenas autorização de sudo para os coletores de leitura específicos. O script de contagem aceita um identificador numérico ou nome simples de tabela e, opcionalmente, um set numérico; o script valida os parâmetros antes de invocar o IPFW. Padrões do sudoers são globs, não substituem a validação de argumentos. Consulte `docs/homologation-0.1.5.md` antes de implantar.
 
-## Descoberta automática de tabelas (branch experimental)
-
-Instale também `ipfw_table_discovery.sh` e `ipfw_table_entries.sh` em
-`/usr/local/scripts/zabbix/`, pertencentes a root:wheel, permissão 0755.
-
-O sudoers deve autorizar **somente** os três scripts de leitura do projeto, sem
-`NOPASSWD: ALL`. Para `ipfw_table_entries.sh`, permita apenas um identificador
-numérico de tabela como argumento, utilizando restrições apropriadas do sudoers.
-
-Após reiniciar o agente, teste:
+Após configurar o agente, confira a sintaxe com os caminhos reais do FreeBSD:
 
 ```sh
-/usr/local/sbin/zabbix_agentd -t ipfw.tables.discovery
-/usr/local/sbin/zabbix_agentd -t 'ipfw.table.entries[40]'
+visudo -cf /usr/local/etc/sudoers.d/zabbix-ipfw
+/usr/local/sbin/zabbix_agentd -c /usr/local/etc/zabbix7/zabbix_agentd.conf -t ipfw.raw
+/usr/local/sbin/zabbix_agentd -c /usr/local/etc/zabbix7/zabbix_agentd.conf -t ipfw.tables.discovery
+/usr/local/sbin/zabbix_agentd -c /usr/local/etc/zabbix7/zabbix_agentd.conf -t 'ipfw.table.set.entries[10,0]'
+/usr/local/sbin/zabbix_agentd -c /usr/local/etc/zabbix7/zabbix_agentd.conf -t ipfw.inventory.raw
 ```
 
-A descoberta atualmente suporta identificadores **numéricos** de tabelas do tipo
-`addr`. As contagens incluem entradas de rede e não equivalem automaticamente a
-IPs individuais distintos nem a bloqueios efetivos; a ação da regra associada
-precisa ser verificada separadamente. Nenhuma operação altera o IPFW.
+Substitua a chave de tabela pelo identificador/set realmente existente no ambiente de teste. O UserParameter antigo `ipfw.table.entries[*]` continua disponível para compatibilidade, mas um ID sem set será rejeitado quando for ambíguo.
 
-O YAML desta branch **ainda não foi homologado** por importação no frontend
-Zabbix 7.0/8.0. Não substitua a configuração estável de produção sem homologação.
+## Template e testes
 
-## Servidores sem tabelas IPFW
+Importe `templates/zabbix-7.0/freebsd_ipfw_by_zabbix_agent.yaml` somente em Zabbix 7 de laboratório antes de usar em produção. Não presuma compatibilidade Zabbix 8 sem importação específica. O coletor de tabelas sem nenhuma tabela deve retornar `{"data":[]}` quando a consulta IPFW tiver sucesso; erros da consulta não são convertidos em zero.
 
-O uso de tabelas é **opcional**. O template deve monitorar regras e contadores
-mesmo quando nenhuma tabela estiver configurada.
+Para executar os testes sintéticos em um ambiente de desenvolvimento com Python 3 e PyYAML:
 
-- `ipfw table all info` com execução bem-sucedida e saída vazia: inventário
-  vazio; `ipfw.tables.total=0`, `ipfw.tables.status=1` e descoberta
-  `{"data":[]}`. Não são criados itens dependentes de tabelas.
-- Falha do comando (erro de permissão ou falha de execução): **não** converter
-  para zero; indicar falha de coleta das tabelas.
-- Uma ou mais tabelas: descobrir todas as tabelas numéricas do tipo `addr`;
-  a coleta atual não presume a existência de tabela 40.
-- A remoção de uma tabela anteriormente descoberta deve respeitar a retenção
-  configurada na descoberta do Zabbix.
-
-É necessário validar em FreeBSD um servidor realmente sem tabelas. Caso
-`ipfw table all info` retorne código de erro quando não existem tabelas,
-o coletor deverá distinguir explicitamente essa condição dos erros reais
-antes de considerarmos o cenário homologado.
-
-## Gráficos (versão experimental)
-
-O YAML contém gráficos de regras por ação, pacotes descartados/s,
-bytes descartados/s e quantidade de tabelas. O LLD também inclui
-um protótipo de gráfico de entradas para **cada tabela descoberta**.
-
-Em servidores sem tabelas, o LLD retorna `{"data":[]}`: os gráficos
-gerais permanecem, mas nenhum gráfico por tabela é criado.
-
-As taxas derivam da variação de contadores e podem mostrar descontinuidades
-quando os contadores forem zerados ou regras forem recriadas. A importação
-do novo YAML no frontend Zabbix 7 e a compatibilidade com 8 ainda precisam
-de homologação. Não realize merge ou release até essa validação.
-
-## Inventário agregado (experimental, opcional)
-
-O inventário identifica endereços de origem individuais bloqueados por regras
-`deny`, `drop`, `reject`, `reset` e `unreach`, e entradas de tabelas
-numéricas efetivamente referenciadas nessas regras. Não publica endereços:
-somente números agregados. Prefixos de rede são medidos separadamente de hosts.
-
-Dependência adicional: Python 3, exclusivamente para este coletor.
-Instale `scripts/ipfw_duplicate_inventory.py` e `scripts/ipfw_inventory_collect.py`
-em `/usr/local/scripts/zabbix/` como `root:wheel`, com permissão 0755.
-A instalação requer Python 3.12 (ou ajuste explícito do interpretador no cabeçalho do script para a versão instalada). No FreeBSD, o pacote `python312` pode fornecer somente `/usr/local/bin/python3.12`; não é obrigatório criar links simbólicos.
-
-Autorize no sudoers exclusivamente:
-`zabbix ALL=(root) NOPASSWD: /usr/local/scripts/zabbix/ipfw_inventory_collect.py`.
-Não permita a execução geral do interpretador Python pelo sudoers.
-
-Antes de alterar o agente, valide o sudoers com `visudo -cf /usr/local/etc/sudoers.d/zabbix-ipfw` e faça o teste de execução como usuário `zabbix`. O arquivo de exemplo `agent/userparameter_ipfw.conf` contém a chave nova, mas é preciso adicioná-la ao arquivo de configuração ativo do agente (sem duplicar UserParameters). Reinicie o agente somente após validar a configuração.
-
-Após atualizar os UserParameters e reiniciar o agente, valide:
 ```sh
-su -m zabbix -c '/usr/local/bin/sudo -n /usr/local/scripts/zabbix/ipfw_inventory_collect.py'
-/usr/local/sbin/zabbix_agentd -t ipfw.inventory.raw
+python3 -m pip install 'PyYAML==6.0.2'
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-O item `ipfw.inventory.raw` é coletado a cada 5 minutos. Em caso de
-`status=0`, as contagens consolidadas não devem ser interpretadas como
-completas. O parser rejeita referências ambíguas em diferentes sets; suporte
-para tabelas nomeadas, sintaxes IPFW complexas e comportamento real em
-servidores com múltiplos sets ainda precisa de homologação.
+O CI executa esses testes com Python 3.11, 3.12 e 3.13, mas não substitui a validação em FreeBSD.
 
-**Não instale em produção antes de validar o parser e a importação dos novos
-itens no laboratório.** O recurso não modifica o firewall.
-
-## Descoberta com sets diferentes (v0.1.5)
-
-A chave dos novos protótipos é `ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]`,
-para diferenciar tabelas numéricas com o mesmo ID e sets distintos.
-Adicione o UserParameter `ipfw.table.set.entries[*]` do arquivo `agent/userparameter_ipfw.conf`
-e autorize o script com dois parâmetros numéricos no sudoers antes de importar
-este YAML. Consulte `docs/homologation-0.1.5.md` para o exemplo e as ressalvas.
-A chave anterior `ipfw.table.entries[*]` permanece disponível para compatibilidade.
+**Estado:** candidato de desenvolvimento, aguardando homologação; não realizar merge nem release antes do aceite. Consulte o roteiro em `docs/homologation-0.1.5.md`.
