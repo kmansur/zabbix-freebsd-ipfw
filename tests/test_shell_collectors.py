@@ -38,8 +38,12 @@ class ShellCollectors(unittest.TestCase):
     def test_duplicate_table_ids_are_rejected(self):
         data = ("--- table(10), set(0) ---\nkindex: type: addr\nitems: 3,\n"
                 "--- table(10), set(1) ---\nkindex: type: addr\nitems: 8,\n")
-        self.assertNotEqual(self.execute(DISCOVERY, data).returncode, 0)
+        discovery = self.execute(DISCOVERY, data)
+        self.assertEqual(discovery.returncode, 0, discovery.stderr)
+        self.assertEqual(len(__import__("json").loads(discovery.stdout)["data"]), 2)
         self.assertNotEqual(self.execute(COUNT, data, ("10",)).returncode, 0)
+        self.assertEqual(self.execute(COUNT, data, ("10", "0")).stdout.strip(), "3")
+        self.assertEqual(self.execute(COUNT, data, ("10", "1")).stdout.strip(), "8")
 
     def test_malformed_discovery_does_not_claim_zero_tables(self):
         result = self.execute(DISCOVERY, "unexpected malformed output")
