@@ -47,8 +47,19 @@ class ShellCollectors(unittest.TestCase):
         self.assertNotIn('{"data":[]}', result.stdout)
 
     def test_incomplete_table_metadata_is_rejected(self):
-        result = self.execute(DISCOVERY, "--- table(10), set(0) ---\\nitems: 3,")
+        result = self.execute(DISCOVERY, "--- table(10), set(0) ---\nitems: 3,")
         self.assertNotEqual(result.returncode, 0)
+
+    def test_distinct_numeric_tables(self):
+        import json
+        data = ("--- table(10), set(0) ---\nkindex: type: addr\nitems: 3,\n"
+                "--- table(11), set(1) ---\nkindex: type: addr\nitems: 8,\n")
+        result = self.execute(DISCOVERY, data)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        tables = json.loads(result.stdout)["data"]
+        self.assertEqual(len(tables), 2)
+        self.assertEqual(tables[0]["{#TABLE_ID}"], "10")
+        self.assertEqual(tables[1]["{#TABLE_SET}"], "1")
 
     def test_unique_table_entries(self):
         data = "--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
