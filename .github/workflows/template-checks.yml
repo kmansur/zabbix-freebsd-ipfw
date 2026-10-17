@@ -5,11 +5,15 @@ on:
 jobs:
   yaml:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - name: Install static validation dependency
         run: python -m pip install 'PyYAML==6.0.2'
       - name: Run static template tests
