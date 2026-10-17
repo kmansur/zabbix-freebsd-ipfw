@@ -53,6 +53,9 @@ class TemplateChecks(unittest.TestCase):
             "ipfw.inventory.host.unique": "$.host_unique",
             "ipfw.inventory.host.occurrences": "$.host_occurrences",
             "ipfw.inventory.host.duplicates": "$.host_duplicate_extra",
+            "ipfw.inventory.prefix.unique": "$.prefix_unique",
+            "ipfw.inventory.prefix.occurrences": "$.prefix_occurrences",
+            "ipfw.inventory.prefix.duplicates": "$.prefix_duplicate_extra",
         }
         for key, path in mapping.items():
             item = items[key]
