@@ -2,15 +2,24 @@
 # Read-only count for a uniquely identified numeric IPFW table.
 set -eu
 export LC_ALL=C
-[ "$#" -eq 1 ] || exit 2
+[ "$#" -ge 1 ] && [ "$#" -le 2 ] || exit 2
+if [ "$#" -eq 2 ]; then
+  case "$2" in ''|*[!0-9]*) exit 2 ;; esac
+  wanted_set=$2
+else
+  wanted_set=""
+fi
 case "$1" in ''|*[!0-9]*) exit 2 ;; esac
 output=$(/sbin/ipfw table all info) || exit 1
-printf '%s\n' "$output" | /usr/bin/awk -v wanted="$1" '
+printf '%s\n' "$output" | /usr/bin/awk -v wanted="$1" -v wanted_set="$wanted_set" '
 /^--- table\(/ {
   id=$0
   sub(/^--- table\(/, "", id)
   sub(/\).*/, "", id)
-  selected=(id == wanted)
+  setid=$0
+  sub(/^.*set\(/, "", setid)
+  sub(/\).*/, "", setid)
+  selected=(id == wanted && (wanted_set == "" || setid == wanted_set))
   if (selected) matches++
 }
 /^[[:space:]]*items:[[:space:]]*[0-9]+/ && selected {
