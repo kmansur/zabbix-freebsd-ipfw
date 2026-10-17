@@ -75,6 +75,24 @@ class TemplateChecks(unittest.TestCase):
             for graph_item in graph["graph_items"]:
                 self.assertIn(graph_item["item"]["key"], keys)
 
+    def test_agent_userparameters_cover_passive_keys(self):
+        agent = (ROOT / "agent/userparameter_ipfw.conf").read_text(encoding="utf-8")
+        declared = set()
+        for line in agent.splitlines():
+            if line.startswith("UserParameter="):
+                key = line.split("=", 1)[1].split(",", 1)[0]
+                declared.add(key.replace("[*]", ""))
+        for item in self.template["items"]:
+            if item["type"] == "ZABBIX_PASSIVE":
+                key = item["key"].split("[", 1)[0]
+                self.assertIn(key, declared)
+        for rule in self.template["discovery_rules"]:
+            if rule["type"] == "ZABBIX_PASSIVE":
+                self.assertIn(rule["key"], declared)
+            for prototype in rule.get("item_prototypes", []):
+                if prototype["type"] == "ZABBIX_PASSIVE":
+                    self.assertIn(prototype["key"].split("[", 1)[0], declared)
+
     def test_graphs(self):
         self.assertGreaterEqual(len(self.export["zabbix_export"].get("graphs", [])), 4)
 
