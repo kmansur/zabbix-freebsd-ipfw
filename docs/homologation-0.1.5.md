@@ -49,13 +49,13 @@ Python opcionais não afeta os coletores shell originais.
 A descoberta do template agora utiliza a chave
 `ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]`. É necessário instalar o
 `UserParameter=ipfw.table.set.entries[*]` da pasta `agent/` e autorizar
-a execução do script com **dois parâmetros numéricos** no sudoers, por exemplo:
+a execução do script com **identificador numérico ou nome simples e set numérico** no sudoers, por exemplo:
 
 ```sudoers
-zabbix ALL=(root) NOPASSWD: /usr/local/scripts/zabbix/ipfw_table_entries.sh [0-9]* [0-9]*
+zabbix ALL=(root) NOPASSWD: /usr/local/scripts/zabbix/ipfw_table_entries.sh [a-zA-Z0-9_.-]* [0-9]*
 ```
 
-A expressão sudoers acima é um glob, **não** uma validação estrita de números;
+A expressão sudoers acima é um glob, **não** uma validação estrita dos argumentos;
 o próprio script valida os dois argumentos e rejeita entradas inválidas.
 Mantenha o script `root:wheel`, sem permissão de gravação para `zabbix`.
 A chave antiga `ipfw.table.entries[*]` continua disponível para usos
@@ -63,3 +63,7 @@ existentes, mas é ambígua quando IDs se repetem em sets distintos.
 
 Os testes sintéticos cobrem chaves qualificadas por set; a compatibilidade
 de sintaxes reais de IPFW em FreeBSD ainda requer homologação.
+
+## Tabelas nomeadas
+
+O LLD e o contador aceitam nomes simples de tabelas com caracteres ASCII alfanuméricos, ponto, hífen e sublinhado. Outros identificadores são rejeitados, em vez de interpolados nos comandos. O inventário de endereços bloqueados reconhece referências `table(nome)` com essa mesma restrição; sintaxes complexas continuam sinalizadas como incompletas. Antes da homologação, valide os formatos reais das saídas no FreeBSD de laboratório.\n
