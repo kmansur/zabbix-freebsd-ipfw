@@ -75,3 +75,19 @@ além de gráfico separado de hosts. Prefixos /24 e /32 não são
 intercambiáveis: o inventário **não** expande intervalos e não calcula
 sobreposição de redes; duplicidade é somente a repetição exata do mesmo
 prefixo após normalização.
+
+## Verificação prévia automatizada (somente leitura)
+
+O script `tools/freebsd-preflight.sh` executa verificações locais do
+agente, do sudoers, da presença de scripts e da igualdade JSON entre a
+execução root/sudo; ele **não imprime** IPs, regras ou saídas brutas.
+Depois de revisar o arquivo, execute no FreeBSD de laboratório:
+
+```sh
+sh tools/freebsd-preflight.sh /usr/local/etc/zabbix7/zabbix_agentd.conf
+```
+
+O `PASS` desse script **não substitui** a importação do template Zabbix,
+a avaliação de Latest data, os protótipos e gráficos, nem os testes de
+compatibilidade com Zabbix 8. A execução deve ocorrer em uma cópia
+revisada e controlada da branch de desenvolvimento, sem redeploy automático.
