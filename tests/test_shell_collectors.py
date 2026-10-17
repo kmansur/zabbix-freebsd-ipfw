@@ -65,6 +65,17 @@ class ShellCollectors(unittest.TestCase):
         self.assertEqual(tables[0]["{#TABLE_ID}"], "10")
         self.assertEqual(tables[1]["{#TABLE_SET}"], "1")
 
+    def test_reject_malformed_table_header_in_count(self):
+        data = ("--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
+                "--- table(unexpected), set(1) ---\nitems: 99,\n")
+        result = self.execute(COUNT, data, ("10", "0"))
+        self.assertNotEqual(result.returncode, 0)
+
+    def test_reject_non_numeric_arguments(self):
+        data = "--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
+        self.assertNotEqual(self.execute(COUNT, data, ("10", "1;id")).returncode, 0)
+        self.assertNotEqual(self.execute(COUNT, data, ("10;id", "0")).returncode, 0)
+
     def test_unique_table_entries(self):
         data = "--- table(10), set(0) ---\nkindex: type: addr\nitems: 8,\n"
         result = self.execute(COUNT, data, ("10",))
