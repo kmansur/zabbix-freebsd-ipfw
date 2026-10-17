@@ -44,11 +44,22 @@ Caso a atualização falhe, restaure o template anterior, remova somente o novo
 UserParameter `ipfw.inventory.raw` e reinicie o agente. Remover os dois scripts
 Python opcionais não afeta os coletores shell originais.
 
-## Limitação de tabelas por set (proteção adicional)
+## Descoberta de tabelas por ID e set
 
-A contagem de entradas por ID numérico recusa IDs repetidos em sets diferentes
-(retorna erro em vez de escolher arbitrariamente uma tabela). A descoberta LLD
-continua fornecendo ID e set, mas o item prototype utiliza somente o ID:
-portanto esse cenário ainda NÃO está coberto para descoberta automática.
-Deve ser testado antes da homologação e requer chave composta (ID/set) com
-seleção inequívoca da tabela, ou exclusão explícita das IDs ambíguas.
+A descoberta do template agora utiliza a chave
+`ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]`. É necessário instalar o
+`UserParameter=ipfw.table.set.entries[*]` da pasta `agent/` e autorizar
+a execução do script com **dois parâmetros numéricos** no sudoers, por exemplo:
+
+```sudoers
+zabbix ALL=(root) NOPASSWD: /usr/local/scripts/zabbix/ipfw_table_entries.sh [0-9]* [0-9]*
+```
+
+A expressão sudoers acima é um glob, **não** uma validação estrita de números;
+o próprio script valida os dois argumentos e rejeita entradas inválidas.
+Mantenha o script `root:wheel`, sem permissão de gravação para `zabbix`.
+A chave antiga `ipfw.table.entries[*]` continua disponível para usos
+existentes, mas é ambígua quando IDs se repetem em sets distintos.
+
+Os testes sintéticos cobrem chaves qualificadas por set; a compatibilidade
+de sintaxes reais de IPFW em FreeBSD ainda requer homologação.
