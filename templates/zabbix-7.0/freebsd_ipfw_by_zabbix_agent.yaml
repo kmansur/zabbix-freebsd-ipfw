@@ -273,6 +273,48 @@ zabbix_export:
           tags:
             - tag: component
               value: inventory
+        - uuid: 315ad7ea0ce44b4581e20ab63154d0a7
+          name: 'IPFW: Unique blocked network prefixes'
+          type: DEPENDENT
+          key: ipfw.inventory.prefix.unique
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.prefix_unique'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: c417d8d86b9c42329c2edb03ca3cb301
+          name: 'IPFW: Blocked network prefix occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.prefix.occurrences
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.prefix_occurrences'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: f250bd7194ad47ec8404b093085958d2
+          name: 'IPFW: Duplicate blocked network prefix occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.prefix.duplicates
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.prefix_duplicate_extra'
+          tags:
+            - tag: component
+              value: inventory
       discovery_rules:
         - uuid: 8fd0794f3fbb4f8f978731ec37e3d0e1
           name: 'IPFW: Discover address tables'
@@ -362,3 +404,15 @@ zabbix_export:
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.host.duplicates
+    - uuid: 8c1c1cb2eeb0417b8fa063a0a0cbb8ab
+      name: 'IPFW: Blocked network prefixes and duplicates'
+      graph_items:
+        - color: 1565C0
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.prefix.unique
+        - sortorder: '1'
+          color: FF9800
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.prefix.duplicates
