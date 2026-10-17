@@ -86,6 +86,14 @@ class DuplicateInventoryTests(unittest.TestCase):
         self.assertEqual(r["status"], 1)
         self.assertEqual(r["host_unique"], 1)
 
+    def test_named_table_header_is_not_silently_accepted(self):
+        rules = "00100 1 1 deny ip from table(10) to me\n"
+        tables = ("--- table(10), set(0) ---\n192.0.2.1/32 0\n"
+                  "--- table(blocklist), set(0) ---\n198.51.100.1/32 0\n")
+        r = summarize(rules, tables)
+        self.assertEqual(r["status"], 0)
+        self.assertGreater(r["unsupported_sources"], 0)
+
     def test_prefix_not_a_host(self):
         r = summarize("01000 1 1 deny ip from 192.0.2.0/24 to me", "")
         self.assertEqual(r["host_unique"], 0)
