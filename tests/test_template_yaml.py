@@ -60,6 +60,15 @@ class TemplateChecks(unittest.TestCase):
             self.assertEqual(item["master_item"]["key"], "ipfw.inventory.raw")
             self.assertEqual(item["preprocessing"][0]["parameters"][0], path)
 
+    def test_inventory_nodata_trigger(self):
+        items = {item["key"]: item for item in self.template["items"]}
+        raw = items["ipfw.inventory.raw"]
+        expressions = [trigger["expression"] for trigger in raw.get("triggers", [])]
+        self.assertIn(
+            "nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,15m)=1",
+            expressions,
+        )
+
     def test_all_graph_items_reference_existing_keys(self):
         keys = {item["key"] for item in self.template["items"]}
         for graph in self.export["zabbix_export"].get("graphs", []):
