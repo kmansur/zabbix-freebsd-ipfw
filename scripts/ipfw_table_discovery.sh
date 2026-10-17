@@ -9,10 +9,11 @@ output=$("$IPFW" table all info) || exit 1
 printf '%s\n' "$output" | "$AWK" '
 function emit() {
   if (!active) return
-  if (id !~ /^[0-9]+$/ || setid !~ /^[0-9]+$/ || type !~ /^[a-zA-Z0-9_-]+$/) {
+  if (id !~ /^[a-zA-Z0-9_.-]+$/ || setid !~ /^[0-9]+$/ || type !~ /^[a-zA-Z0-9_-]+$/) {
     invalid=1
     return
   }
+  if (seen[id SUBSEP setid]++) {invalid=1; return}
   if (n++) data=data ","
   data=data sprintf("{\"{#TABLE_ID}\":\"%s\",\"{#TABLE_SET}\":\"%s\",\"{#TABLE_TYPE}\":\"%s\"}", id, setid, type)
 }
