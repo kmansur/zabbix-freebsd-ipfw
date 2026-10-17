@@ -19,8 +19,10 @@ printf '%s\n' "$output" | "$AWK" -v wanted="$table_id" '
   sub(/^--- table\(/, "", id)
   sub(/\).*/, "", id)
   selected=(id == wanted)
+  if (selected) matches++
 }
 /^[[:space:]]*items:[[:space:]]*[0-9]+/ && selected {
+  if (matches > 1) exit 2
   value=$2
   sub(/,$/, "", value)
   if (value !~ /^[0-9]+$/) exit 2
@@ -28,5 +30,5 @@ printf '%s\n' "$output" | "$AWK" -v wanted="$table_id" '
   found=1
   exit
 }
-END {if (!found) exit 1}
+END {if (!found || matches != 1) exit 1}
 '
