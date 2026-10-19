@@ -53,3 +53,31 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 O CI executa esses testes com Python 3.11, 3.12 e 3.13, mas não substitui a validação em FreeBSD.
 
 **Estado:** candidato de desenvolvimento, aguardando homologação; não realizar merge nem release antes do aceite. Consulte o roteiro em `docs/homologation-0.1.5.md`.
+
+
+## Instalador de laboratório para FreeBSD
+
+O arquivo real de instalação está em `tools/install-zabbix-ipfw-freebsd.sh`.
+Ele utiliza o checkout em `/usr/local/src/zabbix-freebsd-ipfw` e exige que
+FreeBSD, IPFW, Zabbix Agent clássico 7, sudo e Python 3 já estejam instalados.
+O sudoers principal deve incluir `/usr/local/etc/sudoers.d`.
+
+Execute como root:
+
+```sh
+cd /usr/local/src/zabbix-freebsd-ipfw
+git switch main
+git pull --ff-only origin main
+sh tools/install-zabbix-ipfw-freebsd.sh --check
+sh tools/install-zabbix-ipfw-freebsd.sh --install
+```
+
+A instalação cria backup em `/var/backups/zabbix-ipfw/backup.XXXXXXXX`.
+Se necessário, restaure os arquivos usando o caminho **exato** exibido:
+
+```sh
+sh tools/install-zabbix-ipfw-freebsd.sh --rollback /var/backups/zabbix-ipfw/backup.XXXXXXXX
+```
+
+O instalador não instala pacotes, não muda regras IPFW nem importa o template
+automaticamente. Verifique os itens e a descoberta LLD no Zabbix após a instalação.
