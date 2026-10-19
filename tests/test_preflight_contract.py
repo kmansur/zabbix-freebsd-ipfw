@@ -24,7 +24,7 @@ class PreflightContractTests(unittest.TestCase):
     def test_agent_output_regex_accepts_real_types(self):
         import re
         import subprocess
-        pattern = r"\\[[ts]\\|\\{"
+        pattern = r"\[[ts]\|\{"
         self.assertIn(pattern, SCRIPT)
         for example in ('ipfw.raw [t|{"status":1}]', 'ipfw.raw [s|{"status":1}]'):
             self.assertIsNotNone(re.search(pattern, example))
