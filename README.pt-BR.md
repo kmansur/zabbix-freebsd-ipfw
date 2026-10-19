@@ -81,3 +81,16 @@ sh install.sh --rollback /var/backups/zabbix-ipfw/backup.XXXXXXXX
 
 O instalador não instala pacotes, não muda regras IPFW nem importa o template
 automaticamente. Verifique os itens e a descoberta LLD no Zabbix após a instalação.
+
+
+## Desinstalação interativa
+
+Para remover os componentes **locais** deste template, execute como root:
+
+```sh
+sh install.sh --uninstall
+```
+
+O desinstalador cria primeiro um backup em `/var/backups/zabbix-ipfw/` e pergunta **individualmente** antes de excluir o arquivo de UserParameters, o arquivo de sudoers, cada um dos cinco coletores e, somente se seguro, o bloco `Include` criado pelo instalador. Apenas a resposta literal `SIM` autoriza cada exclusão; qualquer outra resposta preserva o item. Ao final, pergunta se deve reiniciar o agente.
+
+Não remove Zabbix Agent, Python, sudo, IPFW, repositório nem backups, pois podem ser compartilhados com outras aplicações. Não altera regras de firewall. A desvinculação ou exclusão do template e seus itens no servidor Zabbix deve ser feita separadamente pelo frontend; o script **não acessa a API**.

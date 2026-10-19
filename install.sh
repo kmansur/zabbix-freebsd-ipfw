@@ -1,6 +1,6 @@
 #!/bin/sh
 # Net Tech IPFW Zabbix Agent installer for FreeBSD
-# Usage: sh install.sh --check|--install|--rollback BACKUP_DIR
+# Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR
 set -eu
 umask 077
 MODE=$(printf '%s' "$*" | awk '{print $1}')
@@ -127,10 +127,93 @@ EOF
   ok "Instalacao concluida. Backup: $BACKUP"
   ok "Rollback: sh $0 --rollback $BACKUP"
 }
+
+# --uninstall: opt-in confirmation for each project-specific file.
+confirm_delete() {
+  printf '\nREMOVER %s? Digite SIM [padrao: nao]: ' "$1" > /dev/tty
+  answer=
+  IFS= read -r answer < /dev/tty || fail 'Terminal interativo necessario'
+  [ "$answer" = SIM ]
+}
+uninstall_all() {
+  [ "$(id -u)" = 0 ] || fail 'Execute como root'
+  [ "$(uname -s)" = FreeBSD ] || fail 'Somente FreeBSD'
+  [ -f "$CONF" ] && [ ! -L "$CONF" ] || fail 'Configuracao do agente ausente/insegura'
+  [ -r /dev/tty ] && [ -w /dev/tty ] || fail 'Use um terminal interativo'
+  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
+  [ -n "$DIR" ] || DIR=/usr/local/etc/zabbix7/zabbix_agentd.conf.d
+  case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include fora do escopo seguro';; esac
+  PARAM=$DIR/userparameter_ipfw.conf
+  for target in "$PARAM" "$SUDOERS"; do [ ! -L "$target" ] || fail "Symlink inseguro: $target"; done
+  for name in $FILES; do [ ! -L "$DEST/$name" ] || fail "Symlink inseguro: $DEST/$name"; done
+  [ -d "$BACKUPS" ] || install -d -o root -g wheel -m 0700 "$BACKUPS"
+  BACKUP=$(mktemp -d "$BACKUPS/uninstall.XXXXXXXX")
+  printf 'CONF=%s\nPARAM=%s\n' "$CONF" "$PARAM" > "$BACKUP/paths"
+  : > "$BACKUP/manifest"
+  backup_file agent "$CONF"
+  backup_file userparameter "$PARAM"
+  backup_file sudoers "$SUDOERS"
+  for name in $FILES; do backup_file "$name" "$DEST/$name"; done
+  ok "Backup antes da remocao: $BACKUP"
+  changed=no
+  if [ -f "$PARAM" ]; then
+    if confirm_delete "$PARAM (UserParameters IPFW)"; then
+      rm -f "$PARAM"; changed=yes; ok 'UserParameters removidos'
+    else ok 'UserParameters preservados'; fi
+  fi
+  if [ -f "$SUDOERS" ]; then
+    if confirm_delete "$SUDOERS (sudoers IPFW)"; then
+      rm -f "$SUDOERS"; changed=yes; ok 'sudoers IPFW removido'
+    else ok 'sudoers IPFW preservado'; fi
+  fi
+  for name in $FILES; do
+    target=$DEST/$name
+    if [ -f "$target" ]; then
+      if confirm_delete "$target (coletor IPFW)"; then
+        rm -f "$target"; changed=yes; ok "Removido: $name"
+      else ok "Preservado: $name"; fi
+    fi
+  done
+  # Only remove the Include stanza explicitly marked by the installer,
+  # and only when no other .conf file in its directory still needs it.
+  if grep -Fqx '# Net Tech IPFW' "$CONF" && grep -Fqx "Include=$DIR/*.conf" "$CONF"; then
+    shared=no
+    for target in "$DIR"/*.conf; do [ -f "$target" ] && shared=yes; done
+    if [ "$shared" = no ]; then
+      if confirm_delete "bloco Include Net Tech IPFW em $CONF"; then
+        temp=$(mktemp "$CONF.ipfw.XXXXXXXX") || fail 'Falha no temporario'
+        awk -v include="Include=$DIR/*.conf" '
+          $0=="# Net Tech IPFW" {marker=1; next}
+          marker && $0==include {marker=0; next}
+          marker {print "# Net Tech IPFW"; marker=0}
+          {print}
+          END {if(marker) print "# Net Tech IPFW"}
+        ' "$CONF" > "$temp"
+        cat "$temp" > "$CONF"
+        rm -f "$temp"
+        changed=yes
+        ok 'Include exclusivo removido'
+      fi
+    else
+      ok 'Include preservado: existem outros arquivos .conf'
+    fi
+  fi
+  if [ "$changed" = yes ] && service zabbix_agentd onestatus >/dev/null 2>&1; then
+    if confirm_delete 'reiniciar Zabbix Agent para aplicar as alteracoes'; then
+      service zabbix_agentd restart >/dev/null || printf 'WARN: Falha reiniciando agente\n' >&2
+    else
+      printf 'WARN: Reinicie o agente manualmente\n' >&2
+    fi
+  fi
+  ok "Desinstalacao local concluida. Backup: $BACKUP"
+  printf 'O template vinculado aos hosts no servidor Zabbix deve ser desvinculado no frontend; esta operacao nao usa API remota.\n'
+  printf 'Nao foram removidos: Zabbix Agent, IPFW, Python, sudo, repositorio ou backups.\n'
+}
 case "$MODE" in
   --check) preflight; ok 'Diagnostico concluido; nada alterado';;
   --install) install_all;;
+  --uninstall) uninstall_all;;
   --rollback) [ "$#" -eq 2 ] || fail 'Informe o diretorio de backup'; [ "$(id -u)" = 0 ] || fail 'Execute como root'; rollback "$2";;
-  --help) echo 'Usage: sh install.sh --check|--install|--rollback BACKUP_DIR';;
+  --help) echo 'Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR';;
   *) fail 'Modo invalido';;
 esac
