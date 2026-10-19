@@ -51,7 +51,9 @@ agent_key() {
       else bad "unexpected agent key response: $key"; fi ;;
   esac
 }
-if choose_agent; then
+if [ "$(id -u)" -ne 0 ]; then
+  bad 'run preflight as root'
+elif choose_agent; then
   SUDOERS=/usr/local/etc/sudoers.d/zabbix-ipfw
   DEST=/usr/local/scripts/zabbix
   if [ -f "$SUDOERS" ] && visudo -cf "$SUDOERS" >/dev/null 2>&1; then ok 'sudoers syntax'; else bad 'sudoers missing or invalid'; fi
