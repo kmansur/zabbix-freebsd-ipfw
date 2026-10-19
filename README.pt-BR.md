@@ -57,8 +57,8 @@ O CI executa esses testes com Python 3.11, 3.12 e 3.13, mas não substitui a val
 
 ## Instalador de laboratório para FreeBSD
 
-O arquivo real de instalação está em `tools/install-zabbix-ipfw-freebsd.sh`.
-Ele utiliza o checkout em `/usr/local/src/zabbix-freebsd-ipfw` e exige que
+O arquivo real de instalação está em `install.sh`.
+Ele detecta o diretorio raiz do checkout automaticamente e exige que
 FreeBSD, IPFW, Zabbix Agent clássico 7, sudo e Python 3 já estejam instalados.
 O sudoers principal deve incluir `/usr/local/etc/sudoers.d`.
 
@@ -68,15 +68,15 @@ Execute como root:
 cd /usr/local/src/zabbix-freebsd-ipfw
 git switch main
 git pull --ff-only origin main
-sh tools/install-zabbix-ipfw-freebsd.sh --check
-sh tools/install-zabbix-ipfw-freebsd.sh --install
+sh install.sh --check
+sh install.sh --install
 ```
 
 A instalação cria backup em `/var/backups/zabbix-ipfw/backup.XXXXXXXX`.
 Se necessário, restaure os arquivos usando o caminho **exato** exibido:
 
 ```sh
-sh tools/install-zabbix-ipfw-freebsd.sh --rollback /var/backups/zabbix-ipfw/backup.XXXXXXXX
+sh install.sh --rollback /var/backups/zabbix-ipfw/backup.XXXXXXXX
 ```
 
 O instalador não instala pacotes, não muda regras IPFW nem importa o template
