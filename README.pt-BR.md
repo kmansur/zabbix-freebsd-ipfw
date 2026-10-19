@@ -98,6 +98,6 @@ Não remove Zabbix Agent, Python, sudo, IPFW, repositório nem backups, pois pod
 
 ## Auditoria PDCA e próximos testes
 
-A revisão de riscos, critérios de aceite e lacunas está em [docs/PDCA-0.1.5.md](docs/PDCA-0.1.5.md). Prioridades: testes de instalação/desinstalação/rollback em VM descartável; Agent 2; tabelas IPFW com sets distintos; importação real de Zabbix 8; tratamento de caches `__pycache__` e configuração `Include` compartilhada. A limpeza de diretórios compartilhados permanece intencionalmente restrita.
+O diagnóstico `tools/freebsd-preflight.sh` aceita tanto Agent clássico quanto Agent 2. Execute `sh tools/freebsd-preflight.sh` para detecção automática ou informe explicitamente o caminho da configuração do agente. O script não mostra JSON/IPs, falha ao encontrar chaves não suportadas e exige inventário `status=1` para aprovação. Esses testes continuam exigindo validação em FreeBSD real.\n\nA revisão de riscos, critérios de aceite e lacunas está em [docs/PDCA-0.1.5.md](docs/PDCA-0.1.5.md). Prioridades: testes de instalação/desinstalação/rollback em VM descartável; Agent 2; tabelas IPFW com sets distintos; importação real de Zabbix 8; tratamento de caches `__pycache__` e configuração `Include` compartilhada. A limpeza de diretórios compartilhados permanece intencionalmente restrita.
 
 O instalador **não** remove o template no servidor Zabbix. Não há homologação completa nem garantia de restauração após falhas arbitrárias apenas pelo CI Linux.
