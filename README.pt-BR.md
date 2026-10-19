@@ -1,6 +1,6 @@
 # FreeBSD IPFW by Zabbix Agent
 
-Template experimental de monitoramento **somente leitura** do firewall IPFW para Zabbix 7.0. Vendor **Net Tech**, versão **0.1.5**. A importação no Zabbix 8 e os testes em FreeBSD real ainda dependem de homologação.
+Template experimental de monitoramento **somente leitura** do firewall IPFW para Zabbix 7.0 e Zabbix 8.0. Vendor **Net Tech**, versão **0.1.5**. A importação no Zabbix 8 e os testes em FreeBSD real ainda dependem de homologação.
 
 ## Escopo
 
@@ -41,7 +41,7 @@ Substitua a chave de tabela pelo identificador/set realmente existente no ambien
 
 ## Template e testes
 
-Importe `templates/zabbix-7.0/freebsd_ipfw_by_zabbix_agent.yaml` somente em Zabbix 7 de laboratório antes de usar em produção. Não presuma compatibilidade Zabbix 8 sem importação específica. O coletor de tabelas sem nenhuma tabela deve retornar `{"data":[]}` quando a consulta IPFW tiver sucesso; erros da consulta não são convertidos em zero.
+Importe `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml` no Zabbix 7 ou `templates/8.0/freebsd_ipfw_by_zabbix_agent.yaml` no Zabbix 8, inicialmente em laboratório. O YAML da versão 8 usa o cabeçalho `version: '8.0'` e requer homologação de importação real no frontend, além dos testes sintéticos. O coletor de tabelas sem nenhuma tabela deve retornar `{"data":[]}` quando a consulta IPFW tiver sucesso; erros da consulta não são convertidos em zero.
 
 Para executar os testes sintéticos em um ambiente de desenvolvimento com Python 3 e PyYAML:
 
