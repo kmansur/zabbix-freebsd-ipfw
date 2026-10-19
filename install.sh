@@ -10,8 +10,62 @@ case "$0" in
   *) SCRIPT_PATH=$(pwd)/$0 ;;
 esac
 REPO=$(cd "$(dirname "$SCRIPT_PATH")" && pwd -P) || exit 1
-CONF=/usr/local/etc/zabbix7/zabbix_agentd.conf
-AGENT=/usr/local/sbin/zabbix_agentd
+CONF=
+AGENT=
+SERVICE=
+AGENT_FLAVOR=
+resolve_agent() {
+  classic_conf=/usr/local/etc/zabbix7/zabbix_agentd.conf
+  agent2_conf=/usr/local/etc/zabbix7/zabbix_agent2.conf
+  classic_ok=no
+  agent2_ok=no
+  [ -x /usr/local/sbin/zabbix_agentd ] && [ -f "$classic_conf" ] && classic_ok=yes
+  [ -x /usr/local/sbin/zabbix_agent2 ] && [ -f "$agent2_conf" ] && agent2_ok=yes
+  if [ "$classic_ok" = yes ] && [ "$agent2_ok" = yes ]; then
+    if service zabbix_agentd onestatus >/dev/null 2>&1 && ! service zabbix_agent2 onestatus >/dev/null 2>&1; then
+      agent2_ok=no
+    elif service zabbix_agent2 onestatus >/dev/null 2>&1 && ! service zabbix_agentd onestatus >/dev/null 2>&1; then
+      classic_ok=no
+    else
+      fail 'Dois agentes encontrados; desative o agente nao utilizado antes de instalar.'
+    fi
+  fi
+  if [ "$classic_ok" = yes ]; then
+    AGENT=/usr/local/sbin/zabbix_agentd
+    CONF=$classic_conf
+    SERVICE=zabbix_agentd
+    AGENT_FLAVOR=classic
+  elif [ "$agent2_ok" = yes ]; then
+    AGENT=/usr/local/sbin/zabbix_agent2
+    CONF=$agent2_conf
+    SERVICE=zabbix_agent2
+    AGENT_FLAVOR=agent2
+  else
+    fail 'Nenhum Zabbix Agent 7 classico ou Agent 2 instalado com configuracao encontrada.'
+  fi
+}
+confirm_service_restart() {
+  printf '\nREINICIAR o servico %s agora? Digite SIM [padrao: nao]: ' "$SERVICE" > /dev/tty
+  answer=
+  IFS= read -r answer < /dev/tty || fail 'Terminal interativo necessario para confirmar o reinicio.'
+  [ "$answer" = SIM ]
+}
+offer_restart() {
+  if service "$SERVICE" onestatus >/dev/null 2>&1; then
+    if [ -r /dev/tty ] && [ -w /dev/tty ]; then
+      if confirm_service_restart; then
+        service "$SERVICE" restart || fail "Falha ao reiniciar $SERVICE"
+        ok "Servico reiniciado: $SERVICE"
+      else
+        printf 'WARN: O servico %s nao foi reiniciado; reinicie manualmente para aplicar as alteracoes.\n' "$SERVICE"
+      fi
+    else
+      printf 'WARN: Sem terminal interativo. Reinicie %s manualmente.\n' "$SERVICE"
+    fi
+  else
+    printf 'WARN: %s esta parado. Nao foi iniciado automaticamente.\n' "$SERVICE"
+  fi
+}
 DEST=/usr/local/scripts/zabbix
 SUDOERS=/usr/local/etc/sudoers.d/zabbix-ipfw
 BACKUPS=/var/backups/zabbix-ipfw
@@ -25,7 +79,8 @@ ok() { printf 'OK: %s\n' "$*"; }
 preflight() {
   [ "$(id -u)" = 0 ] || fail 'Execute como root'
   [ "$(uname -s)" = FreeBSD ] || fail 'Somente FreeBSD'
-  [ -x "$AGENT" ] && [ -f "$CONF" ] || fail 'Instale e configure o Zabbix Agent 7'
+  resolve_agent
+  [ -x "$AGENT" ] && [ -f "$CONF" ] || fail 'Instale e configure o Zabbix Agent'
   [ -x /usr/local/bin/sudo ] && [ -x /sbin/ipfw ] || fail 'sudo ou ipfw indisponivel'
   id zabbix >/dev/null 2>&1 || fail 'Conta zabbix ausente'
   [ -f /usr/local/etc/sudoers ] && [ -d /usr/local/etc/sudoers.d ] || fail 'sudoers.d ausente'
@@ -46,11 +101,11 @@ preflight() {
   [ -n "$PY" ] && [ -x "$PY" ] || fail 'Instale Python 3'
   "$PY" -c 'import json,ipaddress' || fail 'Bibliotecas Python ausentes'
   DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
-  [ -n "$DIR" ] || DIR=/usr/local/etc/zabbix7/zabbix_agentd.conf.d
+  [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
   case "$DIR" in /*) ;; *) fail 'Include relativo nao suportado';; esac
   PARAM=$DIR/userparameter_ipfw.conf
   [ ! -L "$DIR" ] && [ ! -L "$PARAM" ] || fail 'Include/UserParameter symlink'
-  ok "Preflight: Python=$PY UserParameters=$PARAM"
+  ok "Preflight: Agent=$SERVICE Python=$PY UserParameters=$PARAM"
 }
 backup_file() {
   label=$1; path=$2
@@ -78,7 +133,7 @@ rollback() {
   restore_file userparameter "$original_param" "$dir"
   restore_file sudoers "$SUDOERS" "$dir"
   for name in $FILES; do restore_file "$name" "$DEST/$name" "$dir"; done
-  if service zabbix_agentd onestatus >/dev/null 2>&1; then service zabbix_agentd restart >/dev/null 2>&1 || :; fi
+  offer_restart
   ok "Rollback: $dir"
 }
 install_all() {
@@ -118,11 +173,7 @@ EOF
     printf '%s\n' "$result" | grep -Eq '\[t\|\{' || fail "JSON esperado para: $key"
     ok "Chave testada: $key (saida omitida)"
   done
-  if service zabbix_agentd onestatus >/dev/null 2>&1; then
-    service zabbix_agentd restart >/dev/null || fail 'Falha reiniciando agente'
-  else
-    printf 'WARN: Agente nao estava em execucao; nao iniciado automaticamente\n'
-  fi
+  offer_restart
   trap - 0
   ok "Instalacao concluida. Backup: $BACKUP"
   ok "Rollback: sh $0 --rollback $BACKUP"
@@ -138,10 +189,11 @@ confirm_delete() {
 uninstall_all() {
   [ "$(id -u)" = 0 ] || fail 'Execute como root'
   [ "$(uname -s)" = FreeBSD ] || fail 'Somente FreeBSD'
+  resolve_agent
   [ -f "$CONF" ] && [ ! -L "$CONF" ] || fail 'Configuracao do agente ausente/insegura'
   [ -r /dev/tty ] && [ -w /dev/tty ] || fail 'Use um terminal interativo'
   DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
-  [ -n "$DIR" ] || DIR=/usr/local/etc/zabbix7/zabbix_agentd.conf.d
+  [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
   case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include fora do escopo seguro';; esac
   PARAM=$DIR/userparameter_ipfw.conf
   for target in "$PARAM" "$SUDOERS"; do [ ! -L "$target" ] || fail "Symlink inseguro: $target"; done
@@ -198,13 +250,7 @@ uninstall_all() {
       ok 'Include preservado: existem outros arquivos .conf'
     fi
   fi
-  if [ "$changed" = yes ] && service zabbix_agentd onestatus >/dev/null 2>&1; then
-    if confirm_delete 'reiniciar Zabbix Agent para aplicar as alteracoes'; then
-      service zabbix_agentd restart >/dev/null || printf 'WARN: Falha reiniciando agente\n' >&2
-    else
-      printf 'WARN: Reinicie o agente manualmente\n' >&2
-    fi
-  fi
+  if [ "$changed" = yes ]; then offer_restart; fi
   ok "Desinstalacao local concluida. Backup: $BACKUP"
   printf 'O template vinculado aos hosts no servidor Zabbix deve ser desvinculado no frontend; esta operacao nao usa API remota.\n'
   printf 'Nao foram removidos: Zabbix Agent, IPFW, Python, sudo, repositorio ou backups.\n'
@@ -213,7 +259,7 @@ case "$MODE" in
   --check) preflight; ok 'Diagnostico concluido; nada alterado';;
   --install) install_all;;
   --uninstall) uninstall_all;;
-  --rollback) [ "$#" -eq 2 ] || fail 'Informe o diretorio de backup'; [ "$(id -u)" = 0 ] || fail 'Execute como root'; rollback "$2";;
+  --rollback) [ "$#" -eq 2 ] || fail 'Informe o diretorio de backup'; [ "$(id -u)" = 0 ] || fail 'Execute como root'; resolve_agent; rollback "$2";;
   --help) echo 'Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR';;
   *) fail 'Modo invalido';;
 esac
