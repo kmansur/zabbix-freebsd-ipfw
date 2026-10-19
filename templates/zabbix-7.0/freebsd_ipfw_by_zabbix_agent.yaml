@@ -7,6 +7,9 @@ zabbix_export:
     - uuid: 36c582d60d9446c0a888735b4cb9d7c1
       template: 'FreeBSD IPFW by Zabbix Agent'
       name: 'FreeBSD IPFW by Zabbix Agent'
+      vendor:
+        name: 'Net Tech'
+        version: '0.1.5'
       description: |
         Development preview. Read-only IPFW rule counts and selected counters.
         Does NOT enumerate unique blocked IP addresses.
@@ -20,6 +23,11 @@ zabbix_export:
           delay: 1m
           history: 1d
           value_type: TEXT
+          triggers:
+            - uuid: 9d95bef156a94a35937aa839c2f3620c
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
+              name: 'IPFW: Collector data not received for 5 minutes'
+              priority: WARNING
           tags:
             - tag: component
               value: raw
@@ -155,20 +163,6 @@ zabbix_export:
           tags:
             - tag: component
               value: tables
-        - uuid: 91bf78b414ef405889f55c730c9d4a60
-          name: 'IPFW: Table 40 address entries'
-          type: DEPENDENT
-          key: ipfw.table40.entries
-          delay: '0'
-          master_item:
-            key: ipfw.raw
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.table40_entries'
-          tags:
-            - tag: component
-              value: tables
         - uuid: 797ac65d9e0c4c94892f5173423e1ad5
           name: 'IPFW: Denied packet counter change per second'
           type: DEPENDENT
@@ -203,13 +197,222 @@ zabbix_export:
           tags:
             - tag: component
               value: traffic
-      triggers:
-        - uuid: 9d95bef156a94a35937aa839c2f3620c
-          expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
-          name: 'IPFW: Collector data not received for 5 minutes'
-          priority: WARNING
+        - uuid: fda8b01fbe9644a295d1df56a730c4bb
+          name: 'IPFW: Blocked address inventory JSON'
+          type: ZABBIX_PASSIVE
+          key: ipfw.inventory.raw
+          delay: 5m
+          history: 1d
+          value_type: TEXT
+          triggers:
+            - uuid: 83b4c5f7705c47e8b5b87759e64368dc
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,15m)=1'
+              name: 'IPFW: Blocked address inventory not received for 15 minutes'
+              priority: WARNING
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 22e5a165c2af416cb260d58dd9ee390e
+          name: 'IPFW: Blocked address inventory status'
+          type: DEPENDENT
+          key: ipfw.inventory.status
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.status'
+          tags:
+            - tag: component
+              value: inventory
+          triggers:
+            - uuid: cb264056c6f34265b8094eb0a042e05c
+              expression: 'last(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.status)=0'
+              name: 'IPFW: Blocked address inventory incomplete'
+              priority: WARNING
+        - uuid: 90146ae0d43649e687581ce7106d4e98
+          name: 'IPFW: Unique blocked host addresses'
+          type: DEPENDENT
+          key: ipfw.inventory.host.unique
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.host_unique'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 65b09e285ab94a6495b9e264d1ad9a5e
+          name: 'IPFW: Duplicate blocked host occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.host.duplicates
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.host_duplicate_extra'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 2d5f180dc91144efab1c9a04779185c1
+          name: 'IPFW: Blocked host occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.host.occurrences
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.host_occurrences'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: 315ad7ea0ce44b4581e20ab63154d0a7
+          name: 'IPFW: Unique blocked network prefixes'
+          type: DEPENDENT
+          key: ipfw.inventory.prefix.unique
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.prefix_unique'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: c417d8d86b9c42329c2edb03ca3cb301
+          name: 'IPFW: Blocked network prefix occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.prefix.occurrences
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.prefix_occurrences'
+          tags:
+            - tag: component
+              value: inventory
+        - uuid: f250bd7194ad47ec8404b093085958d2
+          name: 'IPFW: Duplicate blocked network prefix occurrences'
+          type: DEPENDENT
+          key: ipfw.inventory.prefix.duplicates
+          delay: '0'
+          master_item:
+            key: ipfw.inventory.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.prefix_duplicate_extra'
+          tags:
+            - tag: component
+              value: inventory
+      discovery_rules:
+        - uuid: 8fd0794f3fbb4f8f978731ec37e3d0e1
+          name: 'IPFW: Discover address tables'
+          type: ZABBIX_PASSIVE
+          key: ipfw.tables.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#TABLE_TYPE}'
+                value: '^addr$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 53164ce0308f4a39b40ed7a68ebd9a74
+              name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
+              type: ZABBIX_PASSIVE
+              key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
+              delay: 5m
+              history: 30d
+              trends: 365d
+              tags:
+                - tag: component
+                  value: tables
+                - tag: table
+                  value: '{#TABLE_ID}'
+          graph_prototypes:
+            - uuid: 99fc22a8b0cd4a61bf5ce6c3d66e07e2
+              name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'FreeBSD IPFW by Zabbix Agent'
+                    key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
       tags:
         - tag: class
           value: security
         - tag: target
           value: freebsd
+  graphs:
+    - uuid: 8c18ac182f5149c5960a6213bec44da3
+      name: 'IPFW: Firewall rules by action'
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.rules.allow
+        - sortorder: '1'
+          color: E53935
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.rules.deny
+        - sortorder: '2'
+          color: FF9800
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.rules.reject
+    - uuid: c7569aebd5f24284b34b060e26721a75
+      name: 'IPFW: Denied packets per second'
+      graph_items:
+        - color: E53935
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.deny.pps
+    - uuid: a8ff42a89bfc4c8a9f6c67d710d43ba0
+      name: 'IPFW: Denied traffic (bytes per second)'
+      graph_items:
+        - color: 1565C0
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.deny.bytes_per_second
+    - uuid: 054c57dd76094ae98fbaef10512b24a7
+      name: 'IPFW: Number of tables'
+      graph_items:
+        - color: 7E57C2
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.tables.total
+    - uuid: 5b0b0e8a631a4fa39307831312a8ad35
+      name: 'IPFW: Blocked host addresses and duplicates'
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.host.unique
+        - sortorder: '1'
+          color: E53935
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.host.duplicates
+    - uuid: 8c1c1cb2eeb0417b8fa063a0a0cbb8ab
+      name: 'IPFW: Blocked network prefixes and duplicates'
+      graph_items:
+        - color: 1565C0
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.prefix.unique
+        - sortorder: '1'
+          color: FF9800
+          item:
+            host: 'FreeBSD IPFW by Zabbix Agent'
+            key: ipfw.inventory.prefix.duplicates
