@@ -59,8 +59,8 @@ O CI executa esses testes com Python 3.11, 3.12 e 3.13, mas não substitui a val
 
 O arquivo real de instalação está em `install.sh`.
 Ele detecta o diretorio raiz do checkout automaticamente e exige que
-FreeBSD, IPFW, Zabbix Agent clássico 7, sudo e Python 3 já estejam instalados.
-O sudoers principal deve incluir `/usr/local/etc/sudoers.d`.
+FreeBSD, IPFW, Zabbix Agent clássico 7 **ou Agent 2**, sudo e Python 3 já estejam instalados.
+O instalador detecta o agente ativo (clássico ou Agent 2), usa a respectiva configuração e pergunta se deve reiniciar o serviço ao final. Se ambos estiverem ativos, interrompe para evitar selecionar o agente errado. O sudoers principal deve incluir `/usr/local/etc/sudoers.d`.
 
 Execute como root:
 
