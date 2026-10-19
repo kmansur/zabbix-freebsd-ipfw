@@ -1,11 +1,15 @@
 #!/bin/sh
 # Net Tech IPFW Zabbix Agent installer for FreeBSD
-# Usage: sh tools/install-zabbix-ipfw-freebsd.sh --check|--install|--rollback BACKUP_DIR
+# Usage: sh install.sh --check|--install|--rollback BACKUP_DIR
 set -eu
 umask 077
 MODE=$(printf '%s' "$*" | awk '{print $1}')
 [ -n "$MODE" ] || MODE=--check
-REPO=/usr/local/src/zabbix-freebsd-ipfw
+case "$0" in
+  /*) SCRIPT_PATH=$0 ;;
+  *) SCRIPT_PATH=$(pwd)/$0 ;;
+esac
+REPO=$(cd "$(dirname "$SCRIPT_PATH")" && pwd -P) || exit 1
 CONF=/usr/local/etc/zabbix7/zabbix_agentd.conf
 AGENT=/usr/local/sbin/zabbix_agentd
 DEST=/usr/local/scripts/zabbix
@@ -127,6 +131,6 @@ case "$MODE" in
   --check) preflight; ok 'Diagnostico concluido; nada alterado';;
   --install) install_all;;
   --rollback) [ "$#" -eq 2 ] || fail 'Informe o diretorio de backup'; [ "$(id -u)" = 0 ] || fail 'Execute como root'; rollback "$2";;
-  --help) echo 'Usage: sh tools/install-zabbix-ipfw-freebsd.sh --check|--install|--rollback BACKUP_DIR';;
+  --help) echo 'Usage: sh install.sh --check|--install|--rollback BACKUP_DIR';;
   *) fail 'Modo invalido';;
 esac
