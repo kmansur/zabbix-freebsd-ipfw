@@ -21,6 +21,18 @@ class PreflightContractTests(unittest.TestCase):
         self.assertIn("status", SCRIPT)
         self.assertNotIn('printf "%s\\n" "$root_json"', SCRIPT)
 
+    def test_agent_output_regex_accepts_real_types(self):
+        import re
+        import subprocess
+        pattern = r"\[[ts]\|\{"
+        self.assertIn(pattern, SCRIPT)
+        for example in ('ipfw.raw [t|{"status":1}]', 'ipfw.raw [s|{"status":1}]'):
+            self.assertIsNotNone(re.search(pattern, example))
+            proc = subprocess.run(["grep", "-E", pattern], input=example,
+                                  capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0)
+        self.assertIsNone(re.search(pattern, "ipfw.raw [m|ZBX_NOTSUPPORTED]"))
+
     def test_complete_local_diagnostics(self):
         self.assertIn("ipfw.tables.discovery", SCRIPT)
         self.assertIn("ipfw.inventory.raw", SCRIPT)
