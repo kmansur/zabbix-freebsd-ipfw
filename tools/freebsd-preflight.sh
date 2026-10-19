@@ -46,7 +46,7 @@ agent_key() {
   esac
   case "$key" in
     ipfw.raw|ipfw.inventory.raw|ipfw.tables.discovery)
-      if printf '%s\n' "$output" | /usr/bin/grep -Eq '\[t\|\{'; then
+      if printf '%s\n' "$output" | /usr/bin/grep -Eq '\[ts]\|\{'; then
         ok "agent key supported: $key"
       else bad "unexpected agent key response: $key"; fi ;;
   esac
