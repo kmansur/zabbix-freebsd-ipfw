@@ -14,12 +14,12 @@
 2. Validar o sudoers com `visudo -cf /usr/local/etc/sudoers.d/zabbix-ipfw`.
 3. Testar o inventário como root e pelo usuário `zabbix`; os JSONs devem apresentar números equivalentes quando o conjunto de regras não mudou.
 4. Confirmar `ipfw.inventory.raw` por meio do `zabbix_agentd -t` usando explicitamente o caminho do arquivo de configuração em uso. Não duplicar UserParameters.
-5. Importar o YAML em ambiente Zabbix **7** de laboratório com atualização de itens, protótipos e gráficos. Registrar qualquer erro de importação.
+5. Importar `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml` em Zabbix **7** de laboratório com atualização de itens, protótipos e gráficos. Registrar qualquer erro de importação.
 6. Verificar `ipfw.inventory.status=1`, `ipfw.inventory.host.unique`, `ipfw.inventory.host.occurrences` e `ipfw.inventory.host.duplicates`. O número de duplicidades é a soma das ocorrências adicionais além da primeira de cada IP.
 7. Conferir o gráfico agregado de IPs únicos e duplicados.
 8. Verificar LLD e gráficos em dois cenários: com tabelas e sem tabelas. Ausência de tabelas não é erro.
 9. Testar, com snapshots sintéticos, regras com IPs repetidos, IPv6, prefixos de rede, fontes inválidas, referências ausentes e o mesmo identificador de tabela em sets diferentes.
-10. Validar a importação e o funcionamento em Zabbix **8** separadamente; não inferir compatibilidade apenas a partir do YAML 7.
+10. Importar `templates/8.0/freebsd_ipfw_by_zabbix_agent.yaml` em Zabbix **8** de laboratório e validar os mesmos itens e gráficos. Não inferir compatibilidade apenas do cabeçalho ou da validação estática.
 
 ## Evidências de aceite
 

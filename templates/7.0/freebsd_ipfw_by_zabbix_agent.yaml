@@ -12,7 +12,7 @@ zabbix_export:
         version: '0.1.5'
       description: |
         Development preview. Read-only IPFW rule counts and selected counters.
-        Does NOT enumerate unique blocked IP addresses.
+        Aggregated blocked-address and CIDR inventory is available; does not evaluate effective policy.
       groups:
         - name: 'Templates/Firewalls'
       items:

@@ -5,7 +5,9 @@ import unittest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE = ROOT / "templates/zabbix-7.0/freebsd_ipfw_by_zabbix_agent.yaml"
+TEMPLATES = {version: ROOT / f"templates/{version}/freebsd_ipfw_by_zabbix_agent.yaml"
+             for version in ("7.0", "8.0")}
+TEMPLATE = TEMPLATES["7.0"]
 
 class RejectDuplicateKeys(yaml.SafeLoader):
     pass
@@ -28,6 +30,23 @@ class TemplateChecks(unittest.TestCase):
     def setUpClass(cls):
         cls.export = yaml.load(TEMPLATE.read_text(encoding="utf-8"), Loader=RejectDuplicateKeys)
         cls.template = cls.export["zabbix_export"]["templates"][0]
+
+    def test_versioned_exports_have_matching_content(self):
+        exports = {
+            version: yaml.load(path.read_text(encoding="utf-8"), Loader=RejectDuplicateKeys)
+            for version, path in TEMPLATES.items()
+        }
+        for version, data in exports.items():
+            self.assertEqual(data["zabbix_export"]["version"], version)
+            self.assertEqual(
+                data["zabbix_export"]["templates"][0]["vendor"],
+                {"name": "Net Tech", "version": "0.1.5"},
+            )
+        left = exports["7.0"]["zabbix_export"]
+        right = exports["8.0"]["zabbix_export"]
+        self.assertEqual(left["templates"], right["templates"])
+        self.assertEqual(left.get("graphs"), right.get("graphs"))
+        self.assertEqual(left.get("template_groups"), right.get("template_groups"))
 
     def test_metadata(self):
         self.assertEqual(self.export["zabbix_export"]["version"], "7.0")
