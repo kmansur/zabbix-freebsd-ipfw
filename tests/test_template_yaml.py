@@ -5,7 +5,9 @@ import unittest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-TEMPLATES = {version: ROOT / f"templates/{version}/freebsd_ipfw_by_zabbix_agent.yaml"\n             for version in ("7.0", "8.0")}\nTEMPLATE = TEMPLATES["7.0"]
+TEMPLATES = {version: ROOT / f"templates/{version}/freebsd_ipfw_by_zabbix_agent.yaml"
+             for version in ("7.0", "8.0")}
+TEMPLATE = TEMPLATES["7.0"]
 
 class RejectDuplicateKeys(yaml.SafeLoader):
     pass
