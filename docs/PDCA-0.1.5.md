@@ -12,7 +12,7 @@
 | P0 | Reinício | Seleção do serviço diferencia Agent clássico/Agent 2, sem evidência de homologação do Agent 2 | Testar agentd e agent2 separadamente, incluindo serviço parado e dois agentes detectáveis |
 | P0 | Inventário | Contagem é textual, não cálculo de regras efetivas; interpretações incompletas devolvem `status=0` | Validar dados reais, erros, IPv4/IPv6, tabelas e sets; verificar tratamento de `status=0` no frontend |
 | P0 | Template 8 | Arquivo com `zabbix_export.version=8.0`; não há evidência de importação real | Importar em Zabbix 8, conferir schema, Latest data, LLD, gráficos e triggers |
-| P1 | Script auxiliar | `tools/freebsd-preflight.sh` usa somente `zabbix_agentd` | Tornar compatível com Agent 2 e impedir falsos positivos quando `-t` retorna unsupported |
+| P1 | Script auxiliar | `tools/freebsd-preflight.sh` usa somente `zabbix_agentd` | Suporte implementado para Agent 2 e rejeição de `ZBX_NOTSUPPORTED` no preflight; aguarda homologação real |
 | P1 | Limpeza | `py_compile` gera `__pycache__` e desinstalador mantém cache no diretório compartilhado | Evitar gerar cache na pasta instalada ou oferecer remoção restrita e confirmada de arquivos exclusivos do projeto |
 | P1 | Configuração | `Include` pode ser acrescentado em config que já inclui o mesmo diretório com formato diferente; risco de chave duplicada | Testar configs com includes existentes e múltiplos UserParameters; não reescrever configurações compartilhadas sem inspeção |
 | P1 | Backup | `--rollback` restaura arquivos, mas não há testes automatizados de falha parcial nem manifest adulterado | Criar testes em jail/VM e validar manifesto, symlinks, diretórios e permissões |
@@ -48,3 +48,8 @@
 **Regras operacionais:** não alterar regras IPFW; não usar NOPASSWD: ALL; não remover diretórios compartilhados ou caches de terceiros; não imprimir IPs/hostnames internos em logs de CI; não declarar compatibilidade sem importação real. Manter a versão `0.1.5` como pré-homologação até coleta dessas evidências.
 
 **Ciclo seguinte:** após cumprir os P0, executar checklist novamente, registrar evidências sanitizadas por cenário e só então decidir versão/release. Não publicar release, fazer deploy ou alterar ambientes de produção automaticamente.
+
+
+### Ciclo de correção do diagnóstico (item 3)
+
+O script `tools/freebsd-preflight.sh` identifica Agent clássico ou Agent 2, aceita argumento de configuração explícito, falha se ambos forem detectados sem escolha inequívoca e não considera `ZBX_NOTSUPPORTED` como sucesso apenas porque o comando terminou com status zero. Verifica também sintaxe do sudoers, propriedade dos scripts e equivalência de inventário root/sudo com `status=1`. **Pendente:** validar em FreeBSD real com ambos os tipos de agente, serviço parado e respostas não suportadas; o CI valida somente sintaxe e contratos estáticos.
