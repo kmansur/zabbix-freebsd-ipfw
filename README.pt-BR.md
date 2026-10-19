@@ -1,6 +1,6 @@
 # FreeBSD IPFW by Zabbix Agent
 
-Template experimental de monitoramento **somente leitura** do firewall IPFW para Zabbix 7.0 e Zabbix 8.0. Vendor **Net Tech**, versão **0.1.5**. A importação no Zabbix 8 e os testes em FreeBSD real ainda dependem de homologação.
+Template experimental de monitoramento **somente leitura** do firewall IPFW para Zabbix 7.0 e Zabbix 8.0. Vendor **Net Tech**, versão **0.1.5**. A importação no Zabbix 8 e os testes completos em FreeBSD com Agent 2, rollback e LLD ainda dependem de homologação. Já houve testes funcionais básicos informados pelo operador em FreeBSD com Agent clássico.
 
 ## Escopo
 
@@ -52,13 +52,13 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 O CI executa esses testes com Python 3.11, 3.12 e 3.13, mas não substitui a validação em FreeBSD.
 
-**Estado:** candidato de desenvolvimento, aguardando homologação; não realizar merge nem release antes do aceite. Consulte o roteiro em `docs/homologation-0.1.5.md`.
+**Estado:** pré-homologação; alterações de desenvolvimento já foram integradas à main, mas **nenhuma release estável deve ser publicada** antes dos critérios de aceite. Consulte também [o PDCA técnico](docs/PDCA-0.1.5.md). Consulte o roteiro em `docs/homologation-0.1.5.md`.
 
 
 ## Instalador de laboratório para FreeBSD
 
 O arquivo real de instalação está em `install.sh`.
-Ele detecta o diretorio raiz do checkout automaticamente e exige que
+Ele detecta o diretório raiz do checkout automaticamente e exige que
 FreeBSD, IPFW, Zabbix Agent clássico 7 **ou Agent 2**, sudo e Python 3 já estejam instalados.
 O instalador detecta o agente ativo (clássico ou Agent 2), usa a respectiva configuração e pergunta se deve reiniciar o serviço ao final. Se ambos estiverem ativos, interrompe para evitar selecionar o agente errado. O sudoers principal deve incluir `/usr/local/etc/sudoers.d`.
 
@@ -94,3 +94,10 @@ sh install.sh --uninstall
 O desinstalador cria primeiro um backup em `/var/backups/zabbix-ipfw/` e pergunta **individualmente** antes de excluir o arquivo de UserParameters, o arquivo de sudoers, cada um dos cinco coletores e, somente se seguro, o bloco `Include` criado pelo instalador. Apenas a resposta literal `SIM` autoriza cada exclusão; qualquer outra resposta preserva o item. Ao final, pergunta se deve reiniciar o agente.
 
 Não remove Zabbix Agent, Python, sudo, IPFW, repositório nem backups, pois podem ser compartilhados com outras aplicações. Não altera regras de firewall. A desvinculação ou exclusão do template e seus itens no servidor Zabbix deve ser feita separadamente pelo frontend; o script **não acessa a API**.
+
+
+## Auditoria PDCA e próximos testes
+
+A revisão de riscos, critérios de aceite e lacunas está em [docs/PDCA-0.1.5.md](docs/PDCA-0.1.5.md). Prioridades: testes de instalação/desinstalação/rollback em VM descartável; Agent 2; tabelas IPFW com sets distintos; importação real de Zabbix 8; tratamento de caches `__pycache__` e configuração `Include` compartilhada. A limpeza de diretórios compartilhados permanece intencionalmente restrita.
+
+O instalador **não** remove o template no servidor Zabbix. Não há homologação completa nem garantia de restauração após falhas arbitrárias apenas pelo CI Linux.

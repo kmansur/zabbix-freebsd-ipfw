@@ -3,17 +3,17 @@
 ## Pré-requisitos
 
 - Ambiente de teste FreeBSD com IPFW; usuário `zabbix`.
-- Agente Zabbix 7 com include de UserParameters corretamente configurado.
+- Agente Zabbix 7 clássico ou Agent 2 com Include de UserParameters corretamente configurado; validar cada implementação separadamente.
 - Python 3 acessível pelo `secure_path` do sudo.
 - Permissões `root:wheel`, modo 0755 para scripts e 0440 para sudoers.
 - Backup prévio da configuração do agente e do template; nenhum teste altera regras do firewall.
 
 ## Procedimento
 
-1. Atualizar a branch `feat/ipfw-table-lld` e instalar os scripts no diretório documentado. Não instalar antes de conferir diferenças locais.
+1. Atualizar a branch `main`, revisar `install.sh` e executar `sh install.sh --check` antes de `sh install.sh --install` na VM de teste; registrar o diretório do backup sem expor identificadores internos.
 2. Validar o sudoers com `visudo -cf /usr/local/etc/sudoers.d/zabbix-ipfw`.
 3. Testar o inventário como root e pelo usuário `zabbix`; os JSONs devem apresentar números equivalentes quando o conjunto de regras não mudou.
-4. Confirmar `ipfw.inventory.raw` por meio do `zabbix_agentd -t` usando explicitamente o caminho do arquivo de configuração em uso. Não duplicar UserParameters.
+4. Confirmar `ipfw.inventory.raw` com a ferramenta de teste do agente instalado e a configuração efetivamente usada (`zabbix_agentd` ou `zabbix_agent2` conforme suporte do binário). Não duplicar UserParameters.
 5. Importar `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml` em Zabbix **7** de laboratório com atualização de itens, protótipos e gráficos. Registrar qualquer erro de importação.
 6. Verificar `ipfw.inventory.status=1`, `ipfw.inventory.host.unique`, `ipfw.inventory.host.occurrences` e `ipfw.inventory.host.duplicates`. O número de duplicidades é a soma das ocorrências adicionais além da primeira de cada IP.
 7. Conferir o gráfico agregado de IPs únicos e duplicados.
@@ -38,11 +38,9 @@ Não tenta inferir sobreposição de prefixos, precedência de regras, NAT, inte
 ou intersecção de políticas. O parser marca entradas não reconhecidas como incompletas.
 Tabelas nomeadas simples e sets distintos têm suporte implementado em LLD e contadores, ainda sem evidência de homologação real. No inventário agregado, referências ambíguas entre sets continuam sinalizadas como incompletas.
 
-## Rollback
+## Rollback e desinstalação
 
-Caso a atualização falhe, restaure o template anterior, remova somente o novo
-UserParameter `ipfw.inventory.raw` e reinicie o agente. Remover os dois scripts
-Python opcionais não afeta os coletores shell originais.
+Use `sh install.sh --rollback CAMINHO_EXATO_DO_BACKUP` para tentar restaurar o estado anterior do host. A restauração automática e sob falha parcial ainda precisa de teste real; não considere o backup homologado até comprovar a igualdade dos arquivos e permissões. `sh install.sh --uninstall` oferece confirmação individual de remoção de componentes locais e preserva componentes compartilhados. Desvincular o template no frontend do Zabbix Server é tarefa separada. Após alterações, valide o serviço correspondente (`zabbix_agentd` ou `zabbix_agent2`).
 
 ## Descoberta de tabelas por ID e set
 
@@ -91,3 +89,8 @@ O `PASS` desse script **não substitui** a importação do template Zabbix,
 a avaliação de Latest data, os protótipos e gráficos, nem os testes de
 compatibilidade com Zabbix 8. A execução deve ocorrer em uma cópia
 revisada e controlada da branch de desenvolvimento, sem redeploy automático.
+
+
+## Estado da revisão PDCA
+
+Consulte [PDCA-0.1.5.md](PDCA-0.1.5.md) para classificação de riscos P0/P1/P2 e critérios de release. Itens pendentes devem continuar marcados como pendentes até evidências reais de FreeBSD e Zabbix 8. O preflight auxiliar atual foi desenvolvido para Agent clássico; não o apresente como verificação de Agent 2 sem adaptação.
