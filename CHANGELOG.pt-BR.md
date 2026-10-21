@@ -4,6 +4,10 @@
 
 ## Não lançado
 
+- Adicionados Other rules, contadores/taxas/graficos de rejeicao, macros por host, verificacao do agente em execucao e roteiro final bilingue.
+- Adicionados testes de servicos reais classico/Agent 2 para chave ausente, arquivo atualizado sem recarga e recuperacao apos reinicio.
+
+
 - Interface e mensagens de execução em inglês; documentação em inglês e português. Confirmação do instalador alterada para `YES`; UUIDs e chaves preservados.
 - Dashboard nativo IPFW com páginas de operação, inventário textual e atlas de tabelas, status legíveis e cores consistentes.
 - Corrigidos JSON text/string do agente, Includes equivalentes e validação dos caminhos confiáveis.

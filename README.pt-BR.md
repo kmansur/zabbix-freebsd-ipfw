@@ -117,3 +117,7 @@ O template inclui o painel nativo **IPFW**, com páginas de operação, inventá
 
 
 A interface e as mensagens de execução ficam em inglês. Consulte o [índice bilíngue](docs/README.pt-BR.md). A confirmação do instalador atual é `YES` (padrão: não); versões antigas podem pedir `SIM`.
+
+## Melhorias e aceite final
+
+Other rules completa as categorias; contadores e taxas de rejeicao estao disponiveis no dashboard IPFW. Macros por host configuram intervalos, janelas de ausencia de dados e filtros de nome/set. A instalacao consulta o agente em execucao com zabbix_get e informa aceite pendente explicitamente. Atualize os coletores antes de importar o template. Siga o [roteiro final](docs/final-validation.pt-BR.md) para ordem, macros, codigos de saida e testes de laboratorio.

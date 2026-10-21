@@ -1,0 +1,24 @@
+name: Running agent verification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: zabbix/zabbix-agent:alpine-7.0-latest
+            binary: /usr/sbin/zabbix_agentd
+          - image: zabbix/zabbix-agent2:alpine-7.0-latest
+            binary: /usr/sbin/zabbix_agent2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install passive-query client
+        run: sudo apt-get update -qq && sudo apt-get install -y zabbix-get
+      - name: Verify missing key and restart behavior against a real daemon
+        run: python3 tools/test_agent_service.py --image '${{ matrix.image }}' --binary '${{ matrix.binary }}'

@@ -65,3 +65,7 @@ A native three-page dashboard provides operations, textual inventory and discove
 
 
 Language policy: runtime/UI text is English; documentation is bilingual. See the [documentation index](docs/README.md). Installer confirmation: `YES` (default: no).
+
+## Monitoring completion and acceptance
+
+Rule categories now include Other rules; reject packet/byte counters and rates are available in the IPFW dashboard. Host macros configure collection intervals, no-data windows and table name/set filters. Installation queries the running daemon using zabbix_get and reports pending runtime acceptance explicitly. Update collectors before importing this template. Follow the [final validation runbook](docs/final-validation.md) for upgrade order, macros, exit codes and the full laboratory sequence.
