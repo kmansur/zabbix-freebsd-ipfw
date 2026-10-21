@@ -415,17 +415,17 @@ zabbix_export:
             - uuid: 99fc22a8b0cd4a61bf5ce6c3d66e07e2
               name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
               graph_items:
-                - color: 1A7C11
+                - color: 34D399
                   item:
                     host: 'FreeBSD IPFW by Zabbix Agent'
                     key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
       dashboards:
-      - uuid: cc16d33053565a0887260110200f3a32
+      - uuid: 2de13e9f8b9c40b68012e8f92a8a0f4c
         name: Sentinela | IPFW
         display_period: '30'
         auto_start: 'NO'
         pages:
-        - name: 01 / OperaÃ§Ã£o
+        - name: 01 / OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
           widgets:
           - type: item
             name: 01 | Coleta de regras
@@ -488,7 +488,7 @@ zabbix_export:
               name: thresholds.1.threshold
               value: '1'
           - type: item
-            name: 02 | InventÃ¡rio
+            name: 02 | InventÃƒÆ’Ã‚Â¡rio
             x: '18'
             y: '0'
             width: '18'
@@ -510,7 +510,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: 02 | InventÃ¡rio
+              value: 02 | InventÃƒÆ’Ã‚Â¡rio
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -704,7 +704,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: item
-            name: Fluxo | TrÃ¡fego negado/s
+            name: Fluxo | TrÃƒÆ’Ã‚Â¡fego negado/s
             x: '24'
             y: '3'
             width: '24'
@@ -726,7 +726,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: Fluxo | TrÃ¡fego negado/s
+              value: Fluxo | TrÃƒÆ’Ã‚Â¡fego negado/s
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -824,7 +824,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Denied traffic (bytes per second)'
           - type: graph
-            name: 03 / ComposiÃ§Ã£o das regras
+            name: 03 / ComposiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o das regras
             x: '0'
             y: '12'
             width: '36'
@@ -836,7 +836,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Firewall rules by action'
           - type: graph
-            name: 04 / EvoluÃ§Ã£o das tabelas
+            name: 04 / EvoluÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o das tabelas
             x: '36'
             y: '12'
             width: '36'
@@ -847,10 +847,10 @@ zabbix_export:
               value:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Number of tables'
-        - name: 02 / InventÃ¡rio textual
+        - name: 02 / InventÃƒÆ’Ã‚Â¡rio textual
           widgets:
           - type: item
-            name: Hosts Ãºnicos nas fontes
+            name: Hosts ÃƒÆ’Ã‚Âºnicos nas fontes
             x: '0'
             y: '0'
             width: '18'
@@ -872,7 +872,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: Hosts Ãºnicos nas fontes
+              value: Hosts ÃƒÆ’Ã‚Âºnicos nas fontes
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -898,7 +898,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: item
-            name: RepetiÃ§Ãµes extras de hosts
+            name: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de hosts
             x: '18'
             y: '0'
             width: '18'
@@ -920,7 +920,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: RepetiÃ§Ãµes extras de hosts
+              value: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de hosts
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -946,7 +946,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: item
-            name: Prefixos Ãºnicos nas fontes
+            name: Prefixos ÃƒÆ’Ã‚Âºnicos nas fontes
             x: '36'
             y: '0'
             width: '18'
@@ -968,7 +968,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: Prefixos Ãºnicos nas fontes
+              value: Prefixos ÃƒÆ’Ã‚Âºnicos nas fontes
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -994,7 +994,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: item
-            name: RepetiÃ§Ãµes extras de prefixos
+            name: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de prefixos
             x: '54'
             y: '0'
             width: '18'
@@ -1016,7 +1016,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: RepetiÃ§Ãµes extras de prefixos
+              value: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de prefixos
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -1042,7 +1042,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: graph
-            name: 01 / Fontes de hosts | Ãºnicas e repetidas
+            name: 01 / Fontes de hosts | ÃƒÆ’Ã‚Âºnicas e repetidas
             x: '0'
             y: '3'
             width: '36'
@@ -1054,7 +1054,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Blocked host addresses and duplicates'
           - type: graph
-            name: 02 / Fontes CIDR | Ãºnicas e repetidas
+            name: 02 / Fontes CIDR | ÃƒÆ’Ã‚Âºnicas e repetidas
             x: '36'
             y: '3'
             width: '36'
@@ -1066,7 +1066,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Blocked network prefixes and duplicates'
           - type: item
-            name: OcorrÃªncias de hosts
+            name: OcorrÃƒÆ’Ã‚Âªncias de hosts
             x: '0'
             y: '9'
             width: '24'
@@ -1088,7 +1088,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: OcorrÃªncias de hosts
+              value: OcorrÃƒÆ’Ã‚Âªncias de hosts
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -1114,7 +1114,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: item
-            name: OcorrÃªncias de prefixos
+            name: OcorrÃƒÆ’Ã‚Âªncias de prefixos
             x: '24'
             y: '9'
             width: '24'
@@ -1136,7 +1136,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: OcorrÃªncias de prefixos
+              value: OcorrÃƒÆ’Ã‚Âªncias de prefixos
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -1162,7 +1162,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: item
-            name: Integridade do inventÃ¡rio
+            name: Integridade do inventÃƒÆ’Ã‚Â¡rio
             x: '48'
             y: '9'
             width: '24'
@@ -1184,7 +1184,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: Integridade do inventÃ¡rio
+              value: Integridade do inventÃƒÆ’Ã‚Â¡rio
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -1413,7 +1413,7 @@ zabbix_export:
               name: reference
               value: TBL01
       valuemaps:
-      - uuid: 74a0fe7336205dd4a628f7fe2934c6ba
+      - uuid: 2d5b9f0117e84687836417dcac7b51d1
         name: IPFW collection health
         mappings:
         - value: '0'
@@ -1429,62 +1429,62 @@ zabbix_export:
     - uuid: 8c18ac182f5149c5960a6213bec44da3
       name: 'IPFW: Firewall rules by action'
       graph_items:
-        - color: 1A7C11
+        - color: 34D399
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.rules.allow
         - sortorder: '1'
-          color: E53935
+          color: FBBF24
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.rules.deny
         - sortorder: '2'
-          color: FF9800
+          color: FB7185
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.rules.reject
     - uuid: c7569aebd5f24284b34b060e26721a75
       name: 'IPFW: Denied packets per second'
       graph_items:
-        - color: E53935
+        - color: FBBF24
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.deny.pps
     - uuid: a8ff42a89bfc4c8a9f6c67d710d43ba0
       name: 'IPFW: Denied traffic (bytes per second)'
       graph_items:
-        - color: 1565C0
+        - color: 38BDF8
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.deny.bytes_per_second
     - uuid: 054c57dd76094ae98fbaef10512b24a7
       name: 'IPFW: Number of tables'
       graph_items:
-        - color: 7E57C2
+        - color: C4B5FD
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.tables.total
     - uuid: 5b0b0e8a631a4fa39307831312a8ad35
       name: 'IPFW: Blocked host addresses and duplicates'
       graph_items:
-        - color: 1A7C11
+        - color: 34D399
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.host.unique
         - sortorder: '1'
-          color: E53935
+          color: FBBF24
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.host.duplicates
     - uuid: 8c1c1cb2eeb0417b8fa063a0a0cbb8ab
       name: 'IPFW: Blocked network prefixes and duplicates'
       graph_items:
-        - color: 1565C0
+        - color: 38BDF8
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.prefix.unique
         - sortorder: '1'
-          color: FF9800
+          color: FB7185
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.prefix.duplicates

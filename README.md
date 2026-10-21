@@ -56,3 +56,7 @@ For operational acceptance, follow [homologation checklist](docs/homologation-0.
 ## Upgrade and validation status
 
 See [release readiness](docs/release-readiness.md) for the new consolidated table collector, upgrade order, timeout settings, regression coverage and remaining operational acceptance gates. CI now includes a disposable FreeBSD VM; it never modifies firewall policy. Live frontend import and service acceptance remain separate requirements.
+
+## Sentinela dashboard
+
+A native three-page dashboard provides operations, textual inventory and discovered-table views. See the [dashboard guide](docs/dashboard-sentinela.md) for design, import and interpretation.

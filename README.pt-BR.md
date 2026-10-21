@@ -105,3 +105,7 @@ O instalador **não** remove o template no servidor Zabbix. Não há homologaç�
 ## Atualização e estado de validação
 
 A coleta de tabelas agora usa `ipfw.tables.raw`, o novo componente `ipfw_tables_collect.py` e itens dependentes. Atualize os coletores/UserParameters com o instalador e reinicie o agente antes de importar os templates. Veja [preparação e critérios de aceite](docs/release-readiness.md): inclui timeouts, testes e as validações operacionais ainda necessárias. O projeto continua como prévia até homologação real.
+
+## Dashboard Sentinela
+
+O template inclui o painel nativo **Sentinela | IPFW**, com páginas de operação, inventário textual e tabelas descobertas. Veja [como importar e acessar](docs/dashboard-sentinela.md). Não é necessário reinstalar os coletores para adicionar o dashboard.
