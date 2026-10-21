@@ -33,7 +33,8 @@ def main():
                 raise RuntimeError('Disposable Zabbix frontend did not become ready') from None
             time.sleep(3)
     rules = {name: {'createMissing': True, 'updateExisting': True}
-             for name in ('templates', 'items', 'discoveryRules', 'graphs', 'triggers')}
+             for name in ('templates', 'items', 'discoveryRules', 'graphs', 'triggers',
+                          'templateDashboards', 'valueMaps')}
     rules['template_groups'] = {'createMissing': True}
     for _ in range(2):
         if rpc('configuration.import', {'format': 'yaml', 'source': Path(source).read_text(),
@@ -50,7 +51,12 @@ def main():
     items = rpc('item.get', {'templateids': [template_id], 'output': ['key_']})
     if not {'ipfw.raw', 'ipfw.tables.raw', 'ipfw.inventory.raw'} <= {i['key_'] for i in items}:
         raise RuntimeError('Required master items missing')
-    print('PASS: template imported and reimported; required items and dependent discovery exist')
+    dashboards = rpc('templatedashboard.get', {'templateids': [template_id],
+                                              'output': ['name'], 'selectPages': 'extend'})
+    sentinela = [d for d in dashboards if d['name'] == 'Sentinela | IPFW']
+    if len(sentinela) != 1 or len(sentinela[0]['pages']) != 3:
+        raise RuntimeError('Expected exactly one Sentinela dashboard with three pages after reimport')
+    print('PASS: import/reimport, master items, dependent discovery and three-page dashboard')
 
 
 if __name__ == '__main__':
