@@ -7,6 +7,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class DashboardChecks(unittest.TestCase):
+    def test_portuguese_labels_are_valid_utf8(self):
+        for version in ('7.0', '8.0'):
+            path = ROOT / f'templates/{version}/freebsd_ipfw_by_zabbix_agent.yaml'
+            text = path.read_bytes().decode('utf-8')
+            dashboard = yaml.safe_load(text)['zabbix_export']['templates'][0]['dashboards'][0]
+            self.assertEqual([p['name'] for p in dashboard['pages']],
+                             ['01 / Opera\u00e7\u00e3o', '02 / Invent\u00e1rio textual', '03 / Atlas de tabelas'])
+            names = [w['name'] for p in dashboard['pages'] for w in p['widgets']]
+            self.assertIn('Fluxo | Tr\u00e1fego negado/s', names)
+            self.assertIn('03 / Composi\u00e7\u00e3o das regras', names)
+            self.assertIn('04 / Evolu\u00e7\u00e3o das tabelas', names)
+            for marker in ('\u00c3', '\u00c2', '\ufffd'):
+                self.assertNotIn(marker, text)
+
     def test_references_and_layout(self):
         data = yaml.safe_load((ROOT / 'templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml').read_text(encoding='utf-8'))['zabbix_export']
         template = data['templates'][0]
