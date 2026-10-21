@@ -62,14 +62,22 @@ def verify(executable, host, port, extra=(), run=None):
         try:
             response = run([executable, '-s', host, '-p', str(port), '-k', key, '-t', '10', *extra],
                            capture_output=True, text=True, timeout=12)
-            if 'ZBX_NOTSUPPORTED' in response.stdout or 'Unsupported item key' in response.stdout:
-                print(f'FAIL running agent does not support {key}; restart/reload the correct service')
-                status = 1
-                continue
-            if response.returncode:
+            # zabbix_get also prefixes ACL/empty-connection failures with ZBX_NOTSUPPORTED.
+            # Classify the transport explanation before treating the prefix as an item error.
+            details = (response.stdout + '\n' + response.stderr).lower()
+            transport = any(marker in details for marker in (
+                'received empty response', 'dropped connection', 'access permissions',
+                'connection refused', 'cannot connect', 'cannot establish',
+                'connection timed out', 'connection reset', 'tls handshake', 'ssl_connect'))
+            unsupported = 'zbx_notsupported' in details or 'unsupported item key' in details
+            if transport or (response.returncode and not unsupported):
                 print(f'UNVERIFIED {key}: transport, ACL or TLS settings prevented the query')
                 if not status:
                     status = 2
+                continue
+            if unsupported:
+                print(f'FAIL running agent rejected {key}; check key registration and collector execution')
+                status = 1
                 continue
             try:
                 valid = healthy(key, json.loads(response.stdout))
