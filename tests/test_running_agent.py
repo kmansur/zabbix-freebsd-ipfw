@@ -42,6 +42,19 @@ class RunningAgentTests(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(verify('get', '127.0.0.1', 10050, run=run), 2)
 
+    def test_acl_response_with_unsupported_prefix_is_unverified(self):
+        message = ('ZBX_NOTSUPPORTED: Received empty response from Zabbix Agent at [192.0.2.10]. '
+                   'Assuming that agent dropped connection because of access permissions.')
+        for code in (0, 1):
+            for stdout, stderr in ((message, ''), ('', message)):
+                run = Mock(return_value=subprocess.CompletedProcess([], code, stdout, stderr))
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    self.assertEqual(verify('get', '127.0.0.1', 10050, run=run), 2)
+                self.assertIn('UNVERIFIED', output.getvalue())
+                self.assertNotIn('FAIL', output.getvalue())
+                self.assertNotIn('192.0.2.10', output.getvalue())
+
     def test_old_raw_schema_and_wrong_totals_are_rejected(self):
         self.assertFalse(healthy('ipfw.raw', {'status': 1, 'rules_total': 0}))
         self.assertFalse(healthy('ipfw.raw', {'status': True}))

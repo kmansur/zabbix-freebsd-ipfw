@@ -257,7 +257,8 @@ verify_runtime() {
   "$PY" "$REPO/tools/check_agent_runtime.py" --config "$CONF" || runtime_code=$?
   case "$runtime_code" in
     0) ok 'Runtime verification completed: the running agent supports the current collectors' ;;
-    *) printf 'WARN: Files are installed, but runtime acceptance is pending. Restart the correct agent and rerun --verify-runtime. For ACL/TLS/non-loopback endpoints, use tools/check_agent_runtime.py with explicit connection options.\n'; return "$runtime_code" ;;
+    1) printf 'WARN: Files are installed, but runtime acceptance is pending. Check live key registration and collector execution; reload/restart the correct agent if its configuration changed.\n'; return 1 ;;
+    *) printf 'WARN: Files are installed, but runtime acceptance is pending. This origin could not verify the endpoint. Query from an authorized origin using the correct endpoint/TLS options; another restart alone will not resolve ACL restrictions.\n'; return "$runtime_code" ;;
   esac
 }
 
