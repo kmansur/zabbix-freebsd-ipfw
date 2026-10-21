@@ -14,7 +14,7 @@ class DashboardChecks(unittest.TestCase):
             self.assertTrue(text.isascii())
             dashboard = yaml.safe_load(text)['zabbix_export']['templates'][0]['dashboards'][0]
             self.assertEqual([p['name'] for p in dashboard['pages']],
-                             ['01 / Operations', '02 / Textual inventory', '03 / Table atlas'])
+                             ['Operations', 'Textual inventory', 'Table atlas'])
             names = [w['name'] for p in dashboard['pages'] for w in p['widgets']]
             self.assertIn('Flow | Denied traffic/s', names)
             self.assertIn('03 / Rule composition', names)

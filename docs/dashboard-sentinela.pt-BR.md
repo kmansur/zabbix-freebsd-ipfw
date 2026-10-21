@@ -12,9 +12,9 @@ O estado OK significa sucesso da coleta, não ausência de incidentes nem garant
 
 ## Páginas
 
-1. **01 / Operations** — quatro cartões de contexto; destaque para pacotes/s, bytes/s e número de tabelas; quatro gráficos de tráfego, composição e evolução.
-2. **02 / Textual inventory** — hosts e prefixos únicos, repetições extras, ocorrências e integridade; gráficos separados para hosts e CIDR. Não representa a política efetiva, não expande prefixos e não deduz sobreposição.
-3. **03 / Table atlas** — saúde e quantidade de tabelas; grade de gráficos criados automaticamente pela descoberta, identificados por nome e set, sem IDs fixos de tabelas de teste. Sem tabelas descobertas, a grade pode ficar vazia.
+1. **Operations** — quatro cartões de contexto; destaque para pacotes/s, bytes/s e número de tabelas; quatro gráficos de tráfego, composição e evolução.
+2. **Textual inventory** — hosts e prefixos únicos, repetições extras, ocorrências e integridade; gráficos separados para hosts e CIDR. Não representa a política efetiva, não expande prefixos e não deduz sobreposição.
+3. **Table atlas** — saúde e quantidade de tabelas; grade de gráficos criados automaticamente pela descoberta, identificados por nome e set, sem IDs fixos de tabelas de teste. Sem tabelas descobertas, a grade pode ficar vazia.
 
 ## Como aplicar no Zabbix 7
 

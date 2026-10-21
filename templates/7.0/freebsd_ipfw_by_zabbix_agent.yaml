@@ -425,7 +425,7 @@ zabbix_export:
         display_period: '30'
         auto_start: 'NO'
         pages:
-        - name: 01 / Operations
+        - name: Operations
           widgets:
           - type: item
             name: 01 | Rule collection
@@ -847,7 +847,7 @@ zabbix_export:
               value:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Number of tables'
-        - name: 02 / Textual inventory
+        - name: Textual inventory
           widgets:
           - type: item
             name: Unique source hosts
@@ -1221,7 +1221,7 @@ zabbix_export:
             - type: STRING
               name: thresholds.1.threshold
               value: '1'
-        - name: 03 / Table atlas
+        - name: Table atlas
           widgets:
           - type: item
             name: Discovered tables
