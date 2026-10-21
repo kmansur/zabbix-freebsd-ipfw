@@ -47,6 +47,8 @@ class InstallerHelpers(unittest.TestCase):
         code = (ROOT / 'install.sh').read_text().rsplit('case "$MODE" in', 1)[0]
         if env and 'TEST_CONFIG_ROOT' in env:
             code = code.replace('/usr/local/etc/zabbix7', env['TEST_CONFIG_ROOT'])
+        if env and 'TEST_TTY' in env:
+            code = code.replace('/dev/tty', env['TEST_TTY'])
         return subprocess.run(['sh', '-c', code + '\n' + commands], cwd=ROOT,
                               env={**os.environ, **(env or {})}, text=True, capture_output=True)
 
@@ -64,6 +66,16 @@ class InstallerHelpers(unittest.TestCase):
                 result = self.execute('PY="$TEST_PY"; key="$TEST_KEY"; result="$TEST_RESPONSE"; validate_response',
                                       {'TEST_PY': sys.executable, 'TEST_KEY': key, 'TEST_RESPONSE': response})
                 self.assertEqual(result.returncode, expected, result.stderr)
+
+    def test_confirmation_requires_explicit_english_yes(self):
+        with tempfile.TemporaryDirectory() as td:
+            terminal = Path(td) / 'tty'
+            for function in ('confirm_delete fixture', 'confirm_service_restart'):
+                for answer, expected in (('YES', 0), ('SIM', 1), ('yes', 1), ('', 1), ('NO', 1)):
+                    result = self.execute('read() { answer=$TEST_ANSWER; }; ' + function,
+                                          {'TEST_TTY': str(terminal), 'TEST_ANSWER': answer})
+                    self.assertEqual(result.returncode, expected, result.stderr)
+                    self.assertIn('Type YES [default: no]', terminal.read_text())
 
     def test_equivalent_includes(self):
         with tempfile.TemporaryDirectory() as td:
@@ -84,7 +96,7 @@ class InstallerHelpers(unittest.TestCase):
     def test_rollback_refuses_outside_backup_root(self):
         result = self.execute('rollback /tmp/untrusted')
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Backup fora', result.stderr)
+        self.assertIn('Backup is outside', result.stderr)
 
     def test_rollback_prevalidates_all_files_and_restores(self):
         with tempfile.TemporaryDirectory() as td:
@@ -138,7 +150,7 @@ rollback "$TEST_BACKUP"'''
         # Emulate FreeBSD stat to exercise permission decisions on any POSIX host.
         result = self.execute('stat() { case "$2" in %u) echo 0;; %OLp) echo 777;; esac; }; trusted_path /usr')
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Permissao', result.stderr)
+        self.assertIn('Unsafe write permissions', result.stderr)
 
 
 if __name__ == '__main__':

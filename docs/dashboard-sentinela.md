@@ -1,28 +1,30 @@
-# Sentinela | IPFW
+English | [Português](dashboard-sentinela.pt-BR.md)
 
-Dashboard nativo do template, com três páginas e referências relativas ao host. Não precisa de Grafana, serviço web adicional, CSS instalado no frontend ou nova reinstalação dos coletores.
+# Sentinel | IPFW
 
-## Direção visual
+Native template dashboard with three pages and host-relative references. No Grafana, additional web service, frontend CSS installation or collector reinstallation is required.
 
-Cartões grafite, números grandes, ciano para fluxo, violeta para estrutura e âmbar para tráfego negado/repetições. Cartões de saúde usam fundo verde para `OK` e vermelho para `FALHA`, com texto e horário de coleta. O tema escuro do Zabbix é recomendado para a composição; o tema é preferência do usuário e não é modificado pelo template.
+## Visual direction
 
-O estado OK significa sucesso da coleta, não ausência de incidentes nem garantia da política de segurança. A data/hora exibida deve ser considerada: um valor antigo não comprova coleta atual. As triggers existentes continuam responsáveis pelos alertas.
+Graphite cards, large values, cyan for flow, violet for structure and amber for denied traffic/repeated occurrences. Collection health cards use green for `OK` and red for `FAILED`, with text and a collection timestamp. The Zabbix dark theme is recommended; the template does not change the user's theme.
 
-## Páginas
+OK means successful collection, not absence of incidents or proof of firewall policy correctness. Check the displayed timestamp: an old value does not prove current collection. Existing triggers remain responsible for alerting.
 
-1. **01 / Operação** — quatro cartões de contexto; destaque para pacotes/s, bytes/s e número de tabelas; quatro gráficos de tráfego, composição e evolução.
-2. **02 / Inventário textual** — hosts e prefixos únicos, repetições extras, ocorrências e integridade; gráficos separados para hosts e CIDR. Não representa a política efetiva, não expande prefixos e não deduz sobreposição.
-3. **03 / Atlas de tabelas** — saúde e quantidade de tabelas; grade de gráficos criados automaticamente pela descoberta, identificados por nome e set, sem IDs fixos de tabelas de teste. Sem tabelas descobertas, a grade pode ficar vazia.
+## Pages
 
-## Como aplicar no Zabbix 7
+1. **01 / Operations** — four context cards; prominent packets/s, bytes/s and table count; four charts for traffic, rule composition and table-count history.
+2. **02 / Textual inventory** — unique hosts/prefixes, extra occurrences and integrity; separate host and CIDR charts. This does not represent effective policy, expand prefixes or calculate overlap.
+3. **03 / Table atlas** — table health/count and automatically discovered graphs identified by name and set, without fixed test-table IDs. The grid may be empty when no tables are discovered.
 
-1. Exporte seu template atual como backup. Se tiver personalizações locais, revise a comparação de importação antes de atualizar.
-2. Importe `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml`. Nas opções avançadas, permita criar/atualizar **dashboards de template**, **mapeamentos de valores** e **gráficos**. Mantenha os itens/regras conforme a atualização normal do template.
-3. Abra o host vinculado em **Monitoramento → Hosts → Dashboards** e escolha **Sentinela | IPFW**. O caminho exato pode variar com a tradução do frontend.
-4. Confira as três páginas, os horários de coleta e os gráficos das tabelas descobertas. Use uma janela de uma hora para começar.
+## Apply in Zabbix 7
 
-As chaves e coletores existentes são preservados. A apresentação de status recebe o mapeamento `0 → FALHA`, `1 → OK`; os valores armazenados e as expressões de trigger continuam numéricos.
+1. Export the existing template as a backup. Review the import comparison if you have local customizations.
+2. Import `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml`. Allow creation/update of template dashboards, value maps and graphs, along with the normal item/discovery updates.
+3. Open **Monitoring → Hosts → Dashboards → Sentinel | IPFW**. Paths may vary with frontend translation.
+4. Inspect all pages, collection timestamps and discovered-table graphs, starting with a one-hour window.
 
-## Verificação
+The dashboard UUID is preserved when renaming Sentinela to Sentinel. Reimport updates the existing dashboard rather than requiring deletion. Stored keys, collector output and numeric trigger expressions are unchanged. Health display mappings are `0 → FAILED`, `1 → OK`.
 
-Os testes estáticos conferem referências a itens/gráficos/protótipos e ausência de sobreposição na grade de 72 colunas. O teste de integração importa e reimporta no Zabbix 7 e verifica a presença de um dashboard com três páginas. Isso não substitui a inspeção visual do frontend do operador. A variante 8.0 continua candidata, sem homologação real.
+## Verification
+
+Static tests validate references and non-overlapping positions on the 72-column grid. Integration imports/reimports in Zabbix 7 and checks dashboard identity and three pages. Operator-side visual inspection remains necessary. The 8.0 export remains an unvalidated candidate.

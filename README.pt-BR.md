@@ -1,3 +1,5 @@
+[English](README.md) | Português
+
 # FreeBSD IPFW by Zabbix Agent
 
 Template experimental de monitoramento **somente leitura** do firewall IPFW para Zabbix 7.0 e Zabbix 8.0. Vendor **Net Tech**, versão **0.1.5**. A importação no Zabbix 8 e os testes completos em FreeBSD com Agent 2, rollback e LLD ainda dependem de homologação. Já houve testes funcionais básicos informados pelo operador em FreeBSD com Agent clássico.
@@ -22,6 +24,7 @@ São necessários os coletores:
 - `ipfw_table_discovery.sh`
 - `ipfw_table_entries.sh`
 - `ipfw_inventory_collect.py` e `ipfw_duplicate_inventory.py`
+- `ipfw_tables_collect.py`
 
 O inventário requer Python 3 acessível via shebang `/usr/bin/env python3` no ambiente de execução do sudo. Se FreeBSD expuser somente o executável versionado (por exemplo, `/usr/local/bin/python3.12`), ajuste o shebang **para o caminho absoluto correto** no host de laboratório antes de conceder acesso no sudoers. Não é obrigatório criar links simbólicos.
 
@@ -91,21 +94,26 @@ Para remover os componentes **locais** deste template, execute como root:
 sh install.sh --uninstall
 ```
 
-O desinstalador cria primeiro um backup em `/var/backups/zabbix-ipfw/` e pergunta **individualmente** antes de excluir o arquivo de UserParameters, o arquivo de sudoers, cada um dos cinco coletores e, somente se seguro, o bloco `Include` criado pelo instalador. Apenas a resposta literal `SIM` autoriza cada exclusão; qualquer outra resposta preserva o item. Ao final, pergunta se deve reiniciar o agente.
+O desinstalador cria primeiro um backup em `/var/backups/zabbix-ipfw/` e pergunta **individualmente** antes de excluir o arquivo de UserParameters, o arquivo de sudoers, cada um dos seis componentes e, somente se seguro, o bloco `Include` criado pelo instalador. Apenas a resposta literal `YES` autoriza cada exclusão; qualquer outra resposta preserva o item. Ao final, pergunta se deve reiniciar o agente.
 
 Não remove Zabbix Agent, Python, sudo, IPFW, repositório nem backups, pois podem ser compartilhados com outras aplicações. Não altera regras de firewall. A desvinculação ou exclusão do template e seus itens no servidor Zabbix deve ser feita separadamente pelo frontend; o script **não acessa a API**.
 
 
 ## Auditoria PDCA e próximos testes
 
-O diagnóstico `tools/freebsd-preflight.sh` aceita tanto Agent clássico quanto Agent 2. Execute `sh tools/freebsd-preflight.sh` para detecção automática ou informe explicitamente o caminho da configuração do agente. O script não mostra JSON/IPs, falha ao encontrar chaves não suportadas e exige inventário `status=1` para aprovação. Esses testes continuam exigindo validação em FreeBSD real.\n\nA revisão de riscos, critérios de aceite e lacunas está em [docs/PDCA-0.1.5.md](docs/PDCA-0.1.5.md). Prioridades: testes de instalação/desinstalação/rollback em VM descartável; Agent 2; tabelas IPFW com sets distintos; importação real de Zabbix 8; tratamento de caches `__pycache__` e configuração `Include` compartilhada. A limpeza de diretórios compartilhados permanece intencionalmente restrita.
+O diagnóstico `tools/freebsd-preflight.sh` aceita tanto Agent clássico quanto Agent 2. Execute `sh tools/freebsd-preflight.sh` para detecção automática ou informe explicitamente o caminho da configuração do agente. O script não mostra JSON/IPs, falha ao encontrar chaves não suportadas e exige inventário `status=1` para aprovação. Esses testes continuam exigindo validação em FreeBSD real.
+
+A revisão de riscos, critérios de aceite e lacunas está em [docs/PDCA-0.1.5.md](docs/PDCA-0.1.5.md). Prioridades: testes de instalação/desinstalação/rollback em VM descartável; Agent 2; tabelas IPFW com sets distintos; importação real de Zabbix 8; tratamento de caches `__pycache__` e configuração `Include` compartilhada. A limpeza de diretórios compartilhados permanece intencionalmente restrita.
 
 O instalador **não** remove o template no servidor Zabbix. Não há homologação completa nem garantia de restauração após falhas arbitrárias apenas pelo CI Linux.
 
 ## Atualização e estado de validação
 
-A coleta de tabelas agora usa `ipfw.tables.raw`, o novo componente `ipfw_tables_collect.py` e itens dependentes. Atualize os coletores/UserParameters com o instalador e reinicie o agente antes de importar os templates. Veja [preparação e critérios de aceite](docs/release-readiness.md): inclui timeouts, testes e as validações operacionais ainda necessárias. O projeto continua como prévia até homologação real.
+A coleta de tabelas agora usa `ipfw.tables.raw`, o novo componente `ipfw_tables_collect.py` e itens dependentes. Atualize os coletores/UserParameters com o instalador e reinicie o agente antes de importar os templates. Veja [preparação e critérios de aceite](docs/release-readiness.pt-BR.md): inclui timeouts, testes e as validações operacionais ainda necessárias. O projeto continua como prévia até homologação real.
 
-## Dashboard Sentinela
+## Dashboard Sentinel
 
-O template inclui o painel nativo **Sentinela | IPFW**, com páginas de operação, inventário textual e tabelas descobertas. Veja [como importar e acessar](docs/dashboard-sentinela.md). Não é necessário reinstalar os coletores para adicionar o dashboard.
+O template inclui o painel nativo **Sentinel | IPFW**, com páginas de operação, inventário textual e tabelas descobertas. Veja [como importar e acessar](docs/dashboard-sentinela.pt-BR.md). Não é necessário reinstalar os coletores para adicionar o dashboard.
+
+
+A interface e as mensagens de execução ficam em inglês. Consulte o [índice bilíngue](docs/README.pt-BR.md). A confirmação do instalador atual é `YES` (padrão: não); versões antigas podem pedir `SIM`.

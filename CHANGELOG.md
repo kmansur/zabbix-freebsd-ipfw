@@ -1,8 +1,12 @@
+English | [Português](CHANGELOG.pt-BR.md)
+
 # Changelog
 
 ## Unreleased
 
-- Added the native Sentinela dashboard with operations, textual inventory and table-atlas pages, readable health labels and a consistent chart palette.
+- Standardized runtime/UI text in English and added paired English/Portuguese documentation; installer confirmations now require YES. Dashboard UUIDs and metric keys remain unchanged.
+
+- Added the native Sentinel dashboard with operations, textual inventory and table-atlas pages, readable health labels and a consistent chart palette.
 
 - Fixed installer text/string JSON validation, equivalent Includes and trusted path checks.
 - Hardened backup prevalidation and atomic replacement of restored files.
