@@ -15,8 +15,10 @@ jobs:
         with:
           release: '14.3'
           usesh: true
-          prepare: pkg install -y python312 py312-yaml
+          prepare: |
+            pkg install -y python312 py312-pip
+            python3.12 -m pip install --target /tmp/ipfw-ci-deps 'PyYAML==6.0.2'
           run: |
             set -eu
-            python3.12 -m unittest discover -s tests -p 'test_*.py' -v
+            PYTHONPATH=/tmp/ipfw-ci-deps python3.12 -m unittest discover -s tests -p 'test_*.py' -v
             # Never load IPFW or modify firewall policy in this job.
