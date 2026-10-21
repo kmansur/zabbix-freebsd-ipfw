@@ -1,6 +1,6 @@
 #!/bin/sh
 # Net Tech IPFW Zabbix Agent installer for FreeBSD
-# Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR
+# Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR|--verify-runtime
 set -eu
 umask 077
 MODE=${1:---check}
@@ -133,6 +133,7 @@ preflight() {
   fi
   [ -n "$PY" ] && [ -x "$PY" ] || fail 'Install Python 3'
   "$PY" -c 'import json,ipaddress' || fail 'Required Python modules are missing'
+  [ -f "$REPO/tools/check_agent_runtime.py" ] || fail 'Runtime checker is missing from the repository'
   DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);sub(/[[:space:]]*$/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
   [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
   case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include is outside /usr/local/etc/zabbix7';; esac
@@ -245,8 +246,19 @@ EOF
   done
   offer_restart
   trap - 0
-  ok "Installation completed. Backup: $BACKUP"
+  ok "Files installed. Backup: $BACKUP"
   ok "Rollback: sh $0 --rollback $BACKUP"
+  # Runtime failure does not roll back valid files or undo a declined restart.
+  verify_runtime
+}
+
+verify_runtime() {
+  runtime_code=0
+  "$PY" "$REPO/tools/check_agent_runtime.py" --config "$CONF" || runtime_code=$?
+  case "$runtime_code" in
+    0) ok 'Runtime verification completed: the running agent supports the current collectors' ;;
+    *) printf 'WARN: Files are installed, but runtime acceptance is pending. Restart the correct agent and rerun --verify-runtime. For ACL/TLS/non-loopback endpoints, use tools/check_agent_runtime.py with explicit connection options.\n'; return "$runtime_code" ;;
+  esac
 }
 
 # --uninstall: opt-in confirmation for each project-specific file.
@@ -330,8 +342,9 @@ uninstall_all() {
 case "$MODE" in
   --check) preflight; ok 'Checks completed; no changes made';;
   --install) install_all;;
+  --verify-runtime) preflight; verify_runtime;;
   --uninstall) uninstall_all;;
   --rollback) [ "$#" -eq 2 ] || fail 'Specify the backup directory'; [ "$(id -u)" = 0 ] || fail 'Run as root'; resolve_agent; rollback "$2";;
-  --help) echo 'Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR';;
+  --help) echo 'Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR|--verify-runtime';;
   *) fail 'Invalid mode';;
 esac

@@ -20,13 +20,13 @@ zabbix_export:
           name: 'IPFW: Collector raw JSON'
           type: ZABBIX_PASSIVE
           key: ipfw.raw
-          delay: 1m
+          delay: '{$IPFW.RULES.INTERVAL}'
           history: 1d
           value_type: TEXT
           triggers:
             - uuid: 9d95bef156a94a35937aa839c2f3620c
-              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,5m)=1'
-              name: 'IPFW: Collector data not received for 5 minutes'
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.raw,{$IPFW.RULES.NODATA})=1'
+              name: 'IPFW: Collector data not received for {$IPFW.RULES.NODATA}'
               priority: WARNING
           tags:
             - tag: component
@@ -220,13 +220,13 @@ zabbix_export:
           name: 'IPFW: Blocked address inventory JSON'
           type: ZABBIX_PASSIVE
           key: ipfw.inventory.raw
-          delay: 5m
+          delay: '{$IPFW.INVENTORY.INTERVAL}'
           history: 1d
           value_type: TEXT
           triggers:
             - uuid: 83b4c5f7705c47e8b5b87759e64368dc
-              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,15m)=1'
-              name: 'IPFW: Blocked address inventory not received for 15 minutes'
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,{$IPFW.INVENTORY.NODATA})=1'
+              name: 'IPFW: Blocked address inventory not received for {$IPFW.INVENTORY.NODATA}'
               priority: WARNING
           tags:
             - tag: component
@@ -346,13 +346,13 @@ zabbix_export:
           name: 'IPFW: Table metadata JSON'
           type: ZABBIX_PASSIVE
           key: ipfw.tables.raw
-          delay: 5m
+          delay: '{$IPFW.TABLES.INTERVAL}'
           history: 1d
           value_type: TEXT
           triggers:
             - uuid: 2edbf9acb11840aaacebe3785c974f92
-              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.tables.raw,15m)=1'
-              name: 'IPFW: Table metadata not received for 15 minutes'
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.tables.raw,{$IPFW.TABLES.NODATA})=1'
+              name: 'IPFW: Table metadata not received for {$IPFW.TABLES.NODATA}'
               priority: WARNING
         - uuid: 89f55049eb19459380ea879a785685cb
           name: 'IPFW: Table metadata status'
@@ -372,6 +372,88 @@ zabbix_export:
               expression: 'last(/FreeBSD IPFW by Zabbix Agent/ipfw.tables.metadata.status)=0'
               name: 'IPFW: Table metadata collection failed'
               priority: WARNING
+        - uuid: 5d0173b00c7e4fe1a2e14fb93ca42ae2
+          name: 'IPFW: Other rules'
+          type: DEPENDENT
+          key: ipfw.rules.other
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+          - type: JSONPATH
+            parameters:
+            - $.rules_other
+            error_handler: DISCARD_VALUE
+          tags:
+          - tag: component
+            value: rules
+        - uuid: f400c4cb095647a6b3eec3cdd15befb4
+          name: 'IPFW: Rejected packets counter'
+          type: DEPENDENT
+          key: ipfw.reject.packets
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+          - type: JSONPATH
+            parameters:
+            - $.reject_packets
+            error_handler: DISCARD_VALUE
+          tags:
+          - tag: component
+            value: traffic
+        - uuid: cdf824df94ea4b9ba3e2264bba21eb50
+          name: 'IPFW: Rejected bytes counter'
+          type: DEPENDENT
+          key: ipfw.reject.bytes
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+          - type: JSONPATH
+            parameters:
+            - $.reject_bytes
+            error_handler: DISCARD_VALUE
+          tags:
+          - tag: component
+            value: traffic
+          units: B
+        - uuid: 0646c9de0b5b40f0b49b5237fb20605c
+          name: 'IPFW: Rejected packets per second'
+          type: DEPENDENT
+          key: ipfw.reject.pps
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+          - type: JSONPATH
+            parameters:
+            - $.reject_packets
+            error_handler: DISCARD_VALUE
+          - type: CHANGE_PER_SECOND
+          tags:
+          - tag: component
+            value: traffic
+          units: '!pps'
+          value_type: FLOAT
+        - uuid: e6bf05d13490486c86d1a4ee091fdc2a
+          name: 'IPFW: Rejected traffic (bytes per second)'
+          type: DEPENDENT
+          key: ipfw.reject.bytes_per_second
+          delay: '0'
+          master_item:
+            key: ipfw.raw
+          preprocessing:
+          - type: JSONPATH
+            parameters:
+            - $.reject_bytes
+            error_handler: DISCARD_VALUE
+          - type: CHANGE_PER_SECOND
+          tags:
+          - tag: component
+            value: traffic
+          units: Bps
+          value_type: FLOAT
       discovery_rules:
         - uuid: 8fd0794f3fbb4f8f978731ec37e3d0e1
           name: 'IPFW: Discover address tables'
@@ -391,6 +473,16 @@ zabbix_export:
               - macro: '{#TABLE_TYPE}'
                 value: '^addr$'
                 formulaid: A
+              - macro: '{#TABLE_ID}'
+                value: '{$IPFW.TABLE.NAME.MATCHES}'
+                formulaid: B
+              - macro: '{#TABLE_ID}'
+                value: '{$IPFW.TABLE.NAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: C
+              - macro: '{#TABLE_SET}'
+                value: '{$IPFW.TABLE.SET.MATCHES}'
+                formulaid: D
           item_prototypes:
             - uuid: 53164ce0308f4a39b40ed7a68ebd9a74
               name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
@@ -419,6 +511,34 @@ zabbix_export:
                   item:
                     host: 'FreeBSD IPFW by Zabbix Agent'
                     key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
+      macros:
+      - macro: '{$IPFW.RULES.INTERVAL}'
+        value: 1m
+        description: Rule collector polling interval. Keep the rules no-data window greater than this value.
+      - macro: '{$IPFW.INVENTORY.INTERVAL}'
+        value: 5m
+        description: Aggregate inventory polling interval.
+      - macro: '{$IPFW.TABLES.INTERVAL}'
+        value: 5m
+        description: Table metadata polling interval; also drives dependent discovery and entry counts.
+      - macro: '{$IPFW.RULES.NODATA}'
+        value: 5m
+        description: Rule collector no-data window. Must exceed the polling interval.
+      - macro: '{$IPFW.INVENTORY.NODATA}'
+        value: 15m
+        description: Inventory no-data window. Must exceed the polling interval.
+      - macro: '{$IPFW.TABLES.NODATA}'
+        value: 15m
+        description: Table metadata no-data window. Must exceed the polling interval.
+      - macro: '{$IPFW.TABLE.NAME.MATCHES}'
+        value: .*
+        description: Include table names/IDs matching this regular expression.
+      - macro: '{$IPFW.TABLE.NAME.NOT_MATCHES}'
+        value: ^$
+        description: Exclude table names/IDs matching this regular expression.
+      - macro: '{$IPFW.TABLE.SET.MATCHES}'
+        value: .*
+        description: Include table sets matching this regular expression. Does not change IPFW configuration.
       dashboards:
       - uuid: 2de13e9f8b9c40b68012e8f92a8a0f4c
         name: IPFW
@@ -847,6 +967,222 @@ zabbix_export:
               value:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Number of tables'
+          - type: item
+            name: Other rules
+            x: '0'
+            y: '17'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.rules.other
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Other rules
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: CBD5E1
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Rejected packets/s
+            x: '18'
+            y: '17'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.reject.pps
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Rejected packets/s
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: FB7185
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '1'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Rejected traffic/s
+            x: '36'
+            y: '17'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.reject.bytes_per_second
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Rejected traffic/s
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: FB7185
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '1'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Reject rules
+            x: '54'
+            y: '17'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.rules.reject
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Reject rules
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: FB7185
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: graph
+            name: Rejected packets per second
+            x: '0'
+            y: '20'
+            width: '36'
+            height: '5'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Rejected packets per second'
+          - type: graph
+            name: Rejected traffic (bytes per second)
+            x: '36'
+            y: '20'
+            width: '36'
+            height: '5'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Rejected traffic (bytes per second)'
         - name: Textual inventory
           widgets:
           - type: item
@@ -1426,65 +1762,84 @@ zabbix_export:
         - tag: target
           value: freebsd
   graphs:
-    - uuid: 8c18ac182f5149c5960a6213bec44da3
-      name: 'IPFW: Firewall rules by action'
-      graph_items:
-        - color: 34D399
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.rules.allow
-        - sortorder: '1'
-          color: FBBF24
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.rules.deny
-        - sortorder: '2'
-          color: FB7185
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.rules.reject
-    - uuid: c7569aebd5f24284b34b060e26721a75
-      name: 'IPFW: Denied packets per second'
-      graph_items:
-        - color: FBBF24
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.deny.pps
-    - uuid: a8ff42a89bfc4c8a9f6c67d710d43ba0
-      name: 'IPFW: Denied traffic (bytes per second)'
-      graph_items:
-        - color: 38BDF8
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.deny.bytes_per_second
-    - uuid: 054c57dd76094ae98fbaef10512b24a7
-      name: 'IPFW: Number of tables'
-      graph_items:
-        - color: C4B5FD
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.tables.total
-    - uuid: 5b0b0e8a631a4fa39307831312a8ad35
-      name: 'IPFW: Blocked host addresses and duplicates'
-      graph_items:
-        - color: 34D399
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.inventory.host.unique
-        - sortorder: '1'
-          color: FBBF24
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.inventory.host.duplicates
-    - uuid: 8c1c1cb2eeb0417b8fa063a0a0cbb8ab
-      name: 'IPFW: Blocked network prefixes and duplicates'
-      graph_items:
-        - color: 38BDF8
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.inventory.prefix.unique
-        - sortorder: '1'
-          color: FB7185
-          item:
-            host: 'FreeBSD IPFW by Zabbix Agent'
-            key: ipfw.inventory.prefix.duplicates
+  - uuid: 8c18ac182f5149c5960a6213bec44da3
+    name: 'IPFW: Firewall rules by action'
+    graph_items:
+    - color: 34D399
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.rules.allow
+    - sortorder: '1'
+      color: FBBF24
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.rules.deny
+    - sortorder: '2'
+      color: FB7185
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.rules.reject
+    - sortorder: '3'
+      color: 94A3B8
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.rules.other
+  - uuid: c7569aebd5f24284b34b060e26721a75
+    name: 'IPFW: Denied packets per second'
+    graph_items:
+    - color: FBBF24
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.deny.pps
+  - uuid: a8ff42a89bfc4c8a9f6c67d710d43ba0
+    name: 'IPFW: Denied traffic (bytes per second)'
+    graph_items:
+    - color: 38BDF8
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.deny.bytes_per_second
+  - uuid: 054c57dd76094ae98fbaef10512b24a7
+    name: 'IPFW: Number of tables'
+    graph_items:
+    - color: C4B5FD
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.tables.total
+  - uuid: 5b0b0e8a631a4fa39307831312a8ad35
+    name: 'IPFW: Blocked host addresses and duplicates'
+    graph_items:
+    - color: 34D399
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.inventory.host.unique
+    - sortorder: '1'
+      color: FBBF24
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.inventory.host.duplicates
+  - uuid: 8c1c1cb2eeb0417b8fa063a0a0cbb8ab
+    name: 'IPFW: Blocked network prefixes and duplicates'
+    graph_items:
+    - color: 38BDF8
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.inventory.prefix.unique
+    - sortorder: '1'
+      color: FB7185
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.inventory.prefix.duplicates
+  - uuid: 37687c832b1c4daebd32f53e43915249
+    name: 'IPFW: Rejected packets per second'
+    graph_items:
+    - color: FB7185
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.reject.pps
+  - uuid: adb78ed1ca2f47c3a9c861780fbf2c4b
+    name: 'IPFW: Rejected traffic (bytes per second)'
+    graph_items:
+    - color: FB7185
+      item:
+        host: FreeBSD IPFW by Zabbix Agent
+        key: ipfw.reject.bytes_per_second

@@ -2,6 +2,8 @@
 
 # Preparação para release
 
+Para o pacote atual (verificação do agente em execução, Other rules, rejeições e descoberta configurável), siga o [roteiro de atualização e validação final](final-validation.pt-BR.md). A instalação dos arquivos pode terminar com aceite operacional pendente; confira os códigos de saída antes de considerar o serviço validado.
+
 ## Escopo e atualização
 
 O projeto monitora totais de regras, tráfego negado agregado, descoberta/contagem de tabelas e inventário textual de hosts/CIDR. Não calcula política efetiva nem descobre regras individuais. Inclui gráficos e o dashboard nativo IPFW com três páginas.

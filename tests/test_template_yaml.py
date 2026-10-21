@@ -66,7 +66,9 @@ class TemplateChecks(unittest.TestCase):
 
     def test_inventory_item_dependencies(self):
         items = {item["key"]: item for item in self.template["items"]}
-        self.assertEqual(items["ipfw.inventory.raw"]["delay"], "5m")
+        self.assertEqual(items["ipfw.inventory.raw"]["delay"], "{$IPFW.INVENTORY.INTERVAL}")
+        macros = {m['macro']: m['value'] for m in self.template['macros']}
+        self.assertEqual(macros['{$IPFW.INVENTORY.INTERVAL}'], '5m')
         mapping = {
             "ipfw.inventory.status": "$.status",
             "ipfw.inventory.host.unique": "$.host_unique",
@@ -87,7 +89,7 @@ class TemplateChecks(unittest.TestCase):
         raw = items["ipfw.inventory.raw"]
         expressions = [trigger["expression"] for trigger in raw.get("triggers", [])]
         self.assertIn(
-            "nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,15m)=1",
+            "nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.inventory.raw,{$IPFW.INVENTORY.NODATA})=1",
             expressions,
         )
 

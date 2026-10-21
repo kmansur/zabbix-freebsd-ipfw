@@ -41,7 +41,8 @@ END {
     print "{\"status\":0,\"error\":\"No parseable IPFW rules\"}"
     exit 0
   }
-  printf "{\"status\":1,\"rules_total\":%d,\"rules_allow\":%d,\"rules_deny\":%d,\"rules_reject\":%d,\"deny_packets\":%.0f,\"deny_bytes\":%.0f,\"reject_packets\":%.0f,\"reject_bytes\":%.0f}\n", rules, allowed, denied, rejected, deny_packets, deny_bytes, reject_packets, reject_bytes
+  other = rules - allowed - denied - rejected
+  printf "{\"status\":1,\"rules_total\":%d,\"rules_allow\":%d,\"rules_deny\":%d,\"rules_reject\":%d,\"rules_other\":%d,\"deny_packets\":%.0f,\"deny_bytes\":%.0f,\"reject_packets\":%.0f,\"reject_bytes\":%.0f}\n", rules, allowed, denied, rejected, other, deny_packets, deny_bytes, reject_packets, reject_bytes
 }')
 
 # Optional table census: do not replace missing/failed data with zero.

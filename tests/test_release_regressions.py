@@ -67,6 +67,17 @@ class InstallerHelpers(unittest.TestCase):
                                       {'TEST_PY': sys.executable, 'TEST_KEY': key, 'TEST_RESPONSE': response})
                 self.assertEqual(result.returncode, expected, result.stderr)
 
+    def test_runtime_verification_never_hides_pending_acceptance(self):
+        for code in (0, 1, 2):
+            result = self.execute('fake_python() { return "$TEST_CODE"; }; PY=fake_python; verify_runtime',
+                                  {'TEST_CODE': str(code)})
+            self.assertEqual(result.returncode, code)
+            if code:
+                self.assertIn('runtime acceptance is pending', result.stdout)
+                self.assertNotIn('Runtime verification completed', result.stdout)
+            else:
+                self.assertIn('Runtime verification completed', result.stdout)
+
     def test_confirmation_requires_explicit_english_yes(self):
         with tempfile.TemporaryDirectory() as td:
             terminal = Path(td) / 'tty'

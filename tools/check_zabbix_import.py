@@ -41,16 +41,25 @@ def main():
                                         'rules': rules}) is not True:
             raise RuntimeError('Import failed')
     templates = rpc('template.get', {'filter': {'host': 'FreeBSD IPFW by Zabbix Agent'},
-                                     'output': ['templateid']})
+                                     'output': ['templateid'], 'selectMacros': 'extend'})
     if len(templates) != 1:
         raise RuntimeError('Expected one template after reimport')
     template_id = templates[0]['templateid']
-    discovery = rpc('discoveryrule.get', {'templateids': [template_id], 'output': ['key_', 'type']})
+    discovery = rpc('discoveryrule.get', {'templateids': [template_id], 'output': ['key_', 'type'],
+                                         'selectFilter': 'extend'})
     if not any(d['key_'] == 'ipfw.tables.discovery' and str(d['type']) == '18' for d in discovery):
         raise RuntimeError('Dependent table discovery missing')
     items = rpc('item.get', {'templateids': [template_id], 'output': ['key_']})
     if not {'ipfw.raw', 'ipfw.tables.raw', 'ipfw.inventory.raw'} <= {i['key_'] for i in items}:
         raise RuntimeError('Required master items missing')
+    if not {'ipfw.rules.other', 'ipfw.reject.packets', 'ipfw.reject.bytes',
+            'ipfw.reject.pps', 'ipfw.reject.bytes_per_second'} <= {i['key_'] for i in items}:
+        raise RuntimeError('Additional rule/reject metrics missing')
+    macros = {m['macro']: m['value'] for m in templates[0]['macros']}
+    if macros.get('{$IPFW.TABLE.NAME.MATCHES}') != '.*' or macros.get('{$IPFW.TABLES.INTERVAL}') != '5m':
+        raise RuntimeError('Configurable collection/discovery defaults missing')
+    if not any(len(d['filter']['conditions']) == 4 for d in discovery):
+        raise RuntimeError('Table name/set discovery filters missing')
     dashboards = rpc('templatedashboard.get', {'templateids': [template_id],
                                               'output': ['name'], 'selectPages': 'extend'})
     ipfw_dashboard = [d for d in dashboards if d['name'] == 'IPFW']

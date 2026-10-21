@@ -4,6 +4,10 @@ English | [Português](CHANGELOG.pt-BR.md)
 
 ## Unreleased
 
+- Added Other rules, reject counters/rates/charts, host-level interval/no-data/discovery macros, live-agent verification and a bilingual final acceptance runbook.
+- Added real classic/Agent 2 daemon tests for missing keys, unchanged runtime after file edits and successful restart recovery.
+
+
 - Standardized runtime/UI text in English and added paired English/Portuguese documentation; installer confirmations now require YES. Dashboard UUIDs and metric keys remain unchanged.
 
 - Added the native IPFW dashboard with operations, textual inventory and table-atlas pages, readable health labels and a consistent chart palette.
