@@ -64,7 +64,7 @@ de sintaxes reais de IPFW em FreeBSD ainda requer homologação.
 
 ## Tabelas nomeadas
 
-O LLD e o contador aceitam nomes simples de tabelas com caracteres ASCII alfanuméricos, ponto, hífen e sublinhado. Outros identificadores são rejeitados, em vez de interpolados nos comandos. O inventário de endereços bloqueados reconhece referências `table(nome)` com essa mesma restrição; sintaxes complexas continuam sinalizadas como incompletas. Antes da homologação, valide os formatos reais das saídas no FreeBSD de laboratório.\n
+O LLD e o contador aceitam nomes simples de tabelas com caracteres ASCII alfanuméricos, ponto, hífen e sublinhado. Outros identificadores são rejeitados, em vez de interpolados nos comandos. O inventário de endereços bloqueados reconhece referências `table(nome)` com essa mesma restrição; sintaxes complexas continuam sinalizadas como incompletas. Antes da homologação, valide os formatos reais das saídas no FreeBSD de laboratório.
 ## Prefixos CIDR
 
 O template possui itens dependentes para `ipfw.inventory.prefix.unique`,
@@ -93,4 +93,8 @@ revisada e controlada da branch de desenvolvimento, sem redeploy automático.
 
 ## Estado da revisão PDCA
 
-Consulte [PDCA-0.1.5.md](PDCA-0.1.5.md) para classificação de riscos P0/P1/P2 e critérios de release. Itens pendentes devem continuar marcados como pendentes até evidências reais de FreeBSD e Zabbix 8. O preflight auxiliar atual foi desenvolvido para Agent clássico; não o apresente como verificação de Agent 2 sem adaptação.
+Consulte [PDCA-0.1.5.md](PDCA-0.1.5.md) para classificação de riscos P0/P1/P2 e critérios de release. Itens pendentes devem continuar marcados como pendentes até evidências reais de FreeBSD e Zabbix 8. O preflight reconhece Agent clássico e Agent 2; a validação operacional de ambos continua obrigatória.
+
+## Coleta consolidada de tabelas
+
+Os templates atuais usam `ipfw.tables.raw` como mestre da descoberta e dos contadores dependentes. Instale também `ipfw_tables_collect.py` e sua regra sudoers antes de atualizar os templates. A chave antiga permanece para compatibilidade. Consulte [release-readiness.md](release-readiness.md) para ordem de atualização e evidências automatizadas.

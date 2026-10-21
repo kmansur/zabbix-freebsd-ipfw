@@ -6,17 +6,24 @@ No raw IP address is emitted. Requires Python 3 and permission to read IPFW.
 import json
 import subprocess
 import sys
+import time
+
+sys.dont_write_bytecode = True
 
 from ipfw_duplicate_inventory import summarize
 
 
-def run(args):
-    return subprocess.run(args, check=True, text=True, capture_output=True, timeout=30).stdout
+def run(args, timeout=8):
+    return subprocess.run(args, check=True, text=True, capture_output=True, timeout=timeout).stdout
 
 
 def collect():
+    started = time.monotonic()
     rules = run(("/sbin/ipfw", "-a", "list"))
-    tables = run(("/sbin/ipfw", "table", "all", "list"))
+    remaining = 8 - (time.monotonic() - started)
+    if remaining <= 0:
+        raise subprocess.TimeoutExpired("ipfw inventory", 8)
+    tables = run(("/sbin/ipfw", "table", "all", "list"), timeout=remaining)
     result = summarize(rules, tables)
     # Avoid exposing partial counts as trustworthy totals.
     if result["status"] != 1:

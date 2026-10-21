@@ -18,11 +18,11 @@ Read-only FreeBSD IPFW firewall monitoring with Zabbix 7.0 and a separate Zabbix
 | Path | Purpose |
 | --- | --- |
 | `install.sh` | Interactive FreeBSD installer/check/uninstall/rollback |
-| `scripts/` | Five read-only collectors and parser |
+| `scripts/` | Read-only collectors and parsers |
 | `agent/userparameter_ipfw.conf` | Agent UserParameters |
 | `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml` | Zabbix 7.0 export |
 | `templates/8.0/freebsd_ipfw_by_zabbix_agent.yaml` | Zabbix 8.0 export **pending live import validation** |
-| `tools/freebsd-preflight.sh` | Optional legacy runtime checks (classic Agent only at present) |
+| `tools/freebsd-preflight.sh` | Read-only runtime checks for classic Agent and Agent 2 |
 | `docs/homologation-0.1.5.md` | Acceptance criteria and safe testing |
 | `docs/PDCA-0.1.5.md` | Technical review and action plan |
 
@@ -37,7 +37,7 @@ sh install.sh --check
 sh install.sh --install
 ```
 
-Run as root. The installer detects the checkout directory, validates prerequisites, creates a backup under `/var/backups/zabbix-ipfw/`, installs five root-owned collectors, configures UserParameters and command-specific sudo rules and asks before restarting the active Zabbix service. Do not grant `NOPASSWD: ALL`.
+Run as root. The installer detects the checkout directory, validates prerequisites, creates a backup under `/var/backups/zabbix-ipfw/`, installs six root-owned components, configures UserParameters and command-specific sudo rules and asks before restarting the active Zabbix service. Do not grant `NOPASSWD: ALL`.
 
 It does **not** install OS packages, change IPFW rules, or import a Zabbix Server template. See [Portuguese installation guide](README.pt-BR.md).
 
@@ -52,3 +52,7 @@ Import the appropriate YAML in a test frontend, link to a test host and review i
 CI runs shell syntax checks and synthetic Python/YAML tests, not FreeBSD integration. Do not publish real internal addresses, firewall output, hostnames, topology, customer identifiers or logs containing them. Use RFC 5737/RFC 3849 test addresses only.
 
 For operational acceptance, follow [homologation checklist](docs/homologation-0.1.5.md). Project license: MIT.
+
+## Upgrade and validation status
+
+See [release readiness](docs/release-readiness.md) for the new consolidated table collector, upgrade order, timeout settings, regression coverage and remaining operational acceptance gates. CI now includes a disposable FreeBSD VM; it never modifies firewall policy. Live frontend import and service acceptance remain separate requirements.

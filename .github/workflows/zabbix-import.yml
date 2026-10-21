@@ -1,0 +1,42 @@
+name: Zabbix 7 API import
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: zabbix
+          POSTGRES_PASSWORD: disposable-ci-password
+          POSTGRES_DB: zabbix
+        options: >-
+          --health-cmd "pg_isready -U zabbix"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      server:
+        image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+        env:
+          DB_SERVER_HOST: postgres
+          POSTGRES_USER: zabbix
+          POSTGRES_PASSWORD: disposable-ci-password
+          POSTGRES_DB: zabbix
+      web:
+        image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+        env:
+          DB_SERVER_HOST: postgres
+          POSTGRES_USER: zabbix
+          POSTGRES_PASSWORD: disposable-ci-password
+          POSTGRES_DB: zabbix
+          ZBX_SERVER_HOST: server
+          PHP_TZ: UTC
+        ports:
+          - 8080:8080
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import and update against the real Zabbix API
+        run: python3 tools/check_zabbix_import.py http://localhost:8080/api_jsonrpc.php templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml

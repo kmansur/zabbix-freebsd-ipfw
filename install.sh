@@ -3,7 +3,7 @@
 # Usage: sh install.sh --check|--install|--uninstall|--rollback BACKUP_DIR
 set -eu
 umask 077
-MODE=$(printf '%s' "$*" | awk '{print $1}')
+MODE=${1:---check}
 [ -n "$MODE" ] || MODE=--check
 case "$0" in
   /*) SCRIPT_PATH=$0 ;;
@@ -69,13 +69,46 @@ offer_restart() {
 DEST=/usr/local/scripts/zabbix
 SUDOERS=/usr/local/etc/sudoers.d/zabbix-ipfw
 BACKUPS=/var/backups/zabbix-ipfw
-FILES='ipfw_collect.sh ipfw_table_discovery.sh ipfw_table_entries.sh ipfw_inventory_collect.py ipfw_duplicate_inventory.py'
+FILES='ipfw_collect.sh ipfw_table_discovery.sh ipfw_table_entries.sh ipfw_inventory_collect.py ipfw_duplicate_inventory.py ipfw_tables_collect.py'
 DIR=
 PARAM=
 PY=
 BACKUP=
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 ok() { printf 'OK: %s\n' "$*"; }
+# Validate every existing component, including parent directories, before root writes.
+trusted_path() {
+  check_path=$1
+  case "$check_path" in /*) ;; *) fail 'Caminho deve ser absoluto';; esac
+  case "$check_path/" in */../*|*/./*|*'//'*) fail 'Caminho nao normalizado';; esac
+  while [ "$check_path" != / ]; do
+    [ ! -L "$check_path" ] || fail "Symlink inseguro: $check_path"
+    if [ -e "$check_path" ]; then
+      [ "$(stat -f %u "$check_path")" = 0 ] || fail "Proprietario inseguro: $check_path"
+      mode=$(stat -f %OLp "$check_path")
+      [ $((0$mode & 022)) -eq 0 ] || fail "Permissao de escrita insegura: $check_path"
+    fi
+    check_path=$(dirname "$check_path")
+  done
+}
+has_include() {
+  awk -v expected="$DIR/*.conf" '
+    /^[[:space:]]*Include[[:space:]]*=/ {
+      sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "")
+      sub(/[[:space:]]*$/, "")
+      if ($0 == expected) found=1
+    }
+    END {exit !found}' "$CONF"
+}
+validate_response() {
+  RESPONSE="$result" "$PY" -c 'import json,os,re,sys
+m=re.search(r"\[[ts]\|(.*)\]\s*$",os.environ["RESPONSE"],re.S)
+try:
+ d=json.loads(m.group(1)) if m else None
+ if not isinstance(d,dict): raise ValueError("Expected object")
+ if not (isinstance(d.get("data"),list) if sys.argv[1]=="ipfw.tables.discovery" else d.get("status")==1): raise ValueError("Unhealthy response")
+except (ValueError,AssertionError): sys.exit(1)' "$key"
+}
 preflight() {
   [ "$(id -u)" = 0 ] || fail 'Execute como root'
   [ "$(uname -s)" = FreeBSD ] || fail 'Somente FreeBSD'
@@ -94,16 +127,17 @@ preflight() {
   [ ! -L "$CONF" ] && [ ! -L "$SUDOERS" ] || fail 'Configuracao symlink nao permitida'
   PY=$(command -v python3 2>/dev/null || true)
   if [ -z "$PY" ]; then
-    for candidate in /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
+    for candidate in /usr/local/bin/python3.14 /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
       if [ -x "$candidate" ]; then PY=$candidate; break; fi
     done
   fi
   [ -n "$PY" ] && [ -x "$PY" ] || fail 'Instale Python 3'
   "$PY" -c 'import json,ipaddress' || fail 'Bibliotecas Python ausentes'
-  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
+  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);sub(/[[:space:]]*$/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
   [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
-  case "$DIR" in /*) ;; *) fail 'Include relativo nao suportado';; esac
+  case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include fora de /usr/local/etc/zabbix7';; esac
   PARAM=$DIR/userparameter_ipfw.conf
+  for target in "$CONF" "$PARAM" "$SUDOERS" "$DEST" "$BACKUPS"; do trusted_path "$target"; done
   [ ! -L "$DIR" ] && [ ! -L "$PARAM" ] || fail 'Include/UserParameter symlink'
   ok "Preflight: Agent=$SERVICE Python=$PY UserParameters=$PARAM"
 }
@@ -117,22 +151,54 @@ backup_file() {
     printf '%s absent\n' "$label" >> "$BACKUP/manifest"
   fi
 }
+backup_state() {
+  state=$(awk -v k="$1" '$1==k && NF==2 {print $2}' "$2/manifest")
+  # Backups from the five-component installer predate this collector.
+  if [ -z "$state" ] && [ "$1" = ipfw_tables_collect.py ] && [ "$(wc -l < "$2/manifest" | tr -d ' ')" = 8 ]; then
+    state=absent
+  fi
+  printf '%s\n' "$state"
+}
 restore_file() {
   label=$1; path=$2; dir=$3
-  state=$(awk -v k="$label" '$1==k {print $2}' "$dir/manifest")
-  case "$state" in present) cp -p "$dir/$label" "$path";; absent) rm -f "$path";; *) fail "Backup invalido: $label";; esac
+  state=$(backup_state "$label" "$dir")
+  case "$state" in
+    present)
+      temp=$(mktemp "$path.restore.XXXXXXXX") || fail 'Falha no temporario'
+      cp -p "$dir/$label" "$temp" && mv -f "$temp" "$path" || fail "Falha ao restaurar: $label" ;;
+    absent) rm -f "$path";;
+    *) fail "Backup invalido: $label";;
+  esac
 }
 rollback() {
   dir=$1
+  case "$dir" in "$BACKUPS"/backup.*|"$BACKUPS"/uninstall.*) ;; *) fail 'Backup fora do diretorio autorizado';; esac
+  trusted_path "$dir"
   [ -d "$dir" ] && [ -f "$dir/manifest" ] && [ -f "$dir/paths" ] && [ ! -L "$dir" ] || fail 'Backup ausente'
   original=$(sed -n 's/^CONF=//p' "$dir/paths")
   original_param=$(sed -n 's/^PARAM=//p' "$dir/paths")
   [ "$original" = "$CONF" ] || fail 'Caminho CONF difere do backup'
-  case "$original_param" in /usr/local/etc/*/userparameter_ipfw.conf|/usr/local/etc/*/*/userparameter_ipfw.conf) ;; *) fail 'Destino do backup invalido';; esac
+  case "$original_param" in /usr/local/etc/zabbix7/*/userparameter_ipfw.conf) ;; *) fail 'Destino do backup invalido';; esac
+  # Prevalidate the entire manifest and every source/destination before mutation.
+  [ "$(wc -l < "$dir/paths" | tr -d ' ')" = 2 ] || fail 'Paths invalido'
+  case "$(wc -l < "$dir/manifest" | tr -d ' ')" in 8|9) ;; *) fail 'Manifesto invalido';; esac
+  for label in agent userparameter sudoers $FILES; do
+    state=$(backup_state "$label" "$dir")
+    case "$state" in
+      present) [ -f "$dir/$label" ] || fail "Backup incompleto: $label"; trusted_path "$dir/$label" ;;
+      absent) ;;
+      *) fail "Manifesto invalido: $label" ;;
+    esac
+  done
+  trusted_path "$dir/paths"; trusted_path "$dir/manifest"
+  for target in "$CONF" "$original_param" "$SUDOERS" "$DEST"; do trusted_path "$target"; done
+  [ -d "$(dirname "$original_param")" ] && [ -d "$DEST" ] || fail 'Diretorio de restauracao ausente'
+  if [ -f "$dir/sudoers" ]; then visudo -cf "$dir/sudoers" >/dev/null 2>&1 || fail 'sudoers do backup invalido'; fi
   restore_file agent "$CONF" "$dir"
   restore_file userparameter "$original_param" "$dir"
   restore_file sudoers "$SUDOERS" "$dir"
   for name in $FILES; do restore_file "$name" "$DEST/$name" "$dir"; done
+  visudo -cf /usr/local/etc/sudoers >/dev/null 2>&1 || fail 'sudoers restaurado invalido'
   offer_restart
   ok "Rollback: $dir"
 }
@@ -142,6 +208,7 @@ install_all() {
   BACKUP=$(mktemp -d "$BACKUPS/backup.XXXXXXXX")
   printf 'CONF=%s\nPARAM=%s\n' "$CONF" "$PARAM" > "$BACKUP/paths"
   : > "$BACKUP/manifest"
+  for name in $FILES; do trusted_path "$DEST/$name"; done
   backup_file agent "$CONF"
   backup_file userparameter "$PARAM"
   backup_file sudoers "$SUDOERS"
@@ -152,10 +219,12 @@ install_all() {
     install -o root -g wheel -m 0755 "$REPO/scripts/$name" "$DEST/$name"
     case "$name" in *.sh) sh -n "$DEST/$name" || fail "Erro de sintaxe: $name";; esac
   done
-  sed -i '' "1s|^#!/usr/bin/env python3$|#!$PY|" "$DEST/ipfw_inventory_collect.py"
-  "$PY" -m py_compile "$DEST/ipfw_inventory_collect.py" "$DEST/ipfw_duplicate_inventory.py" || fail 'Erro Python'
+  for name in ipfw_inventory_collect.py ipfw_tables_collect.py; do
+    sed -i '' "1s|^#!/usr/bin/env python3$|#!$PY|" "$DEST/$name"
+  done
+  "$PY" -c 'import pathlib,sys; [compile(pathlib.Path(p).read_bytes(),p,"exec") for p in sys.argv[1:]]' "$DEST/ipfw_inventory_collect.py" "$DEST/ipfw_duplicate_inventory.py" "$DEST/ipfw_tables_collect.py" || fail 'Erro Python'
   install -o root -g wheel -m 0644 "$REPO/agent/userparameter_ipfw.conf" "$PARAM"
-  grep -Fqx "Include=$DIR/*.conf" "$CONF" || printf '\n# Net Tech IPFW\nInclude=%s/*.conf\n' "$DIR" >> "$CONF"
+  has_include || printf '\n# Net Tech IPFW\nInclude=%s/*.conf\n' "$DIR" >> "$CONF"
   cat > "$SUDOERS" <<EOF
 # Net Tech IPFW read-only collectors
 zabbix ALL=(root) NOPASSWD: $DEST/ipfw_collect.sh
@@ -163,14 +232,15 @@ zabbix ALL=(root) NOPASSWD: $DEST/ipfw_table_discovery.sh
 zabbix ALL=(root) NOPASSWD: $DEST/ipfw_table_entries.sh [a-zA-Z0-9_.-]*
 zabbix ALL=(root) NOPASSWD: $DEST/ipfw_table_entries.sh [a-zA-Z0-9_.-]* [0-9]*
 zabbix ALL=(root) NOPASSWD: $DEST/ipfw_inventory_collect.py
+zabbix ALL=(root) NOPASSWD: $DEST/ipfw_tables_collect.py
 EOF
   chown root:wheel "$SUDOERS"
   chmod 0440 "$SUDOERS"
   visudo -cf /usr/local/etc/sudoers >/dev/null 2>&1 || fail 'sudoers invalido'
-  for key in ipfw.raw ipfw.tables.discovery ipfw.inventory.raw; do
+  for key in ipfw.raw ipfw.tables.discovery ipfw.inventory.raw ipfw.tables.raw; do
     result=$("$AGENT" -c "$CONF" -t "$key" 2>/dev/null) || fail "Teste do agent falhou: $key"
     printf '%s\n' "$result" | grep -q 'ZBX_NOTSUPPORTED' && fail "Chave nao suportada: $key"
-    printf '%s\n' "$result" | grep -Eq '\[t\|\{' || fail "JSON esperado para: $key"
+    validate_response || fail "JSON valido e saudavel esperado para: $key"
     ok "Chave testada: $key (saida omitida)"
   done
   offer_restart
@@ -192,16 +262,18 @@ uninstall_all() {
   resolve_agent
   [ -f "$CONF" ] && [ ! -L "$CONF" ] || fail 'Configuracao do agente ausente/insegura'
   [ -r /dev/tty ] && [ -w /dev/tty ] || fail 'Use um terminal interativo'
-  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
+  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);sub(/[[:space:]]*$/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
   [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
   case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include fora do escopo seguro';; esac
   PARAM=$DIR/userparameter_ipfw.conf
   for target in "$PARAM" "$SUDOERS"; do [ ! -L "$target" ] || fail "Symlink inseguro: $target"; done
+  for target in "$CONF" "$PARAM" "$SUDOERS" "$DEST" "$BACKUPS"; do trusted_path "$target"; done
   for name in $FILES; do [ ! -L "$DEST/$name" ] || fail "Symlink inseguro: $DEST/$name"; done
   [ -d "$BACKUPS" ] || install -d -o root -g wheel -m 0700 "$BACKUPS"
   BACKUP=$(mktemp -d "$BACKUPS/uninstall.XXXXXXXX")
   printf 'CONF=%s\nPARAM=%s\n' "$CONF" "$PARAM" > "$BACKUP/paths"
   : > "$BACKUP/manifest"
+  for name in $FILES; do trusted_path "$DEST/$name"; done
   backup_file agent "$CONF"
   backup_file userparameter "$PARAM"
   backup_file sudoers "$SUDOERS"
