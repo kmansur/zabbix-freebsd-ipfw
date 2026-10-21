@@ -1,3 +1,5 @@
+English | [Português](README.pt-BR.md)
+
 # FreeBSD IPFW by Zabbix Agent
 
 Read-only FreeBSD IPFW firewall monitoring with Zabbix 7.0 and a separate Zabbix 8.0 template candidate. Maintainer/vendor: **Net Tech**, template version **0.1.5**.
@@ -41,7 +43,7 @@ Run as root. The installer detects the checkout directory, validates prerequisit
 
 It does **not** install OS packages, change IPFW rules, or import a Zabbix Server template. See [Portuguese installation guide](README.pt-BR.md).
 
-To remove installed local files, use `sh install.sh --uninstall`: confirmation **SIM** is required for every file. Backups and shared services are retained. For rollback use `sh install.sh --rollback /var/backups/zabbix-ipfw/backup.YOUR_ID` with the actual backup path.
+To remove installed local files, use `sh install.sh --uninstall`: confirmation **YES** is required for every file. Backups and shared services are retained. For rollback use `sh install.sh --rollback /var/backups/zabbix-ipfw/backup.YOUR_ID` with the actual backup path.
 
 ## Template import
 
@@ -57,6 +59,9 @@ For operational acceptance, follow [homologation checklist](docs/homologation-0.
 
 See [release readiness](docs/release-readiness.md) for the new consolidated table collector, upgrade order, timeout settings, regression coverage and remaining operational acceptance gates. CI now includes a disposable FreeBSD VM; it never modifies firewall policy. Live frontend import and service acceptance remain separate requirements.
 
-## Sentinela dashboard
+## Sentinel dashboard
 
 A native three-page dashboard provides operations, textual inventory and discovered-table views. See the [dashboard guide](docs/dashboard-sentinela.md) for design, import and interpretation.
+
+
+Language policy: runtime/UI text is English; documentation is bilingual. See the [documentation index](docs/README.md). Installer confirmation: `YES` (default: no).

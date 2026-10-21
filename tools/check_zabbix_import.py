@@ -53,9 +53,9 @@ def main():
         raise RuntimeError('Required master items missing')
     dashboards = rpc('templatedashboard.get', {'templateids': [template_id],
                                               'output': ['name'], 'selectPages': 'extend'})
-    sentinela = [d for d in dashboards if d['name'] == 'Sentinela | IPFW']
-    if len(sentinela) != 1 or len(sentinela[0]['pages']) != 3:
-        raise RuntimeError('Expected exactly one Sentinela dashboard with three pages after reimport')
+    sentinel = [d for d in dashboards if d['name'] == 'Sentinel | IPFW']
+    if len(sentinel) != 1 or len(sentinel[0]['pages']) != 3:
+        raise RuntimeError('Expected exactly one Sentinel dashboard with three pages after reimport')
     print('PASS: import/reimport, master items, dependent discovery and three-page dashboard')
 
 
