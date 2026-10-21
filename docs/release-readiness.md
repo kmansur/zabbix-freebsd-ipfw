@@ -32,7 +32,7 @@ Passing those jobs does **not** certify real Agent 2 service operation, template
 
 1. Fresh install and repeated upgrade on FreeBSD, with root/sudo results equivalent.
 2. Classic agent and Agent 2 separately, stopped/active services and ambiguous installation selection.
-3. Zabbix 7.0 and 8.0 import/update, supported items, dependent discovery, graphs and alert recovery.
+3. Zabbix 7.0 runtime data, graphs and alert recovery; Zabbix 8.0 import/update and runtime validation. Zabbix 7 API import/reimport is automated separately.
 4. Tables absent/present, named tables and repeated names across sets, IPv4/IPv6 and unsupported sources.
 5. Removal with confirmation/refusal and rollback of preexisting/absent files, including induced failures.
 6. Runtime latency and memory measurements on representative rule/table sizes.

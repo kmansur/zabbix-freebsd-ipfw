@@ -133,7 +133,7 @@ preflight() {
   fi
   [ -n "$PY" ] && [ -x "$PY" ] || fail 'Instale Python 3'
   "$PY" -c 'import json,ipaddress' || fail 'Bibliotecas Python ausentes'
-  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
+  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);sub(/[[:space:]]*$/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
   [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
   case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include fora de /usr/local/etc/zabbix7';; esac
   PARAM=$DIR/userparameter_ipfw.conf
@@ -262,7 +262,7 @@ uninstall_all() {
   resolve_agent
   [ -f "$CONF" ] && [ ! -L "$CONF" ] || fail 'Configuracao do agente ausente/insegura'
   [ -r /dev/tty ] && [ -w /dev/tty ] || fail 'Use um terminal interativo'
-  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
+  DIR=$(awk '/^[[:space:]]*Include[[:space:]]*=/ {x=$0;sub(/^[[:space:]]*Include[[:space:]]*=[[:space:]]*/, "", x);sub(/[[:space:]]*$/, "", x);if(x ~ /\/\*\.conf$/){sub(/\/\*\.conf$/, "", x);print x;exit}}' "$CONF")
   [ -n "$DIR" ] || DIR=$(dirname "$CONF")/$(basename "$CONF").d
   case "$DIR" in /usr/local/etc/zabbix7/*) ;; *) fail 'Include fora do escopo seguro';; esac
   PARAM=$DIR/userparameter_ipfw.conf
