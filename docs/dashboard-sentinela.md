@@ -12,9 +12,9 @@ OK means successful collection, not absence of incidents or proof of firewall po
 
 ## Pages
 
-1. **01 / Operations** — four context cards; prominent packets/s, bytes/s and table count; four charts for traffic, rule composition and table-count history.
-2. **02 / Textual inventory** — unique hosts/prefixes, extra occurrences and integrity; separate host and CIDR charts. This does not represent effective policy, expand prefixes or calculate overlap.
-3. **03 / Table atlas** — table health/count and automatically discovered graphs identified by name and set, without fixed test-table IDs. The grid may be empty when no tables are discovered.
+1. **Operations** — four context cards; prominent packets/s, bytes/s and table count; four charts for traffic, rule composition and table-count history.
+2. **Textual inventory** — unique hosts/prefixes, extra occurrences and integrity; separate host and CIDR charts. This does not represent effective policy, expand prefixes or calculate overlap.
+3. **Table atlas** — table health/count and automatically discovered graphs identified by name and set, without fixed test-table IDs. The grid may be empty when no tables are discovered.
 
 ## Apply in Zabbix 7
 
