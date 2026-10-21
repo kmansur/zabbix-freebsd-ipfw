@@ -126,6 +126,13 @@ rollback "$TEST_BACKUP"'''
             self.assertEqual(result.returncode, 0, result.stderr)
             for label, path in targets.items():
                 self.assertEqual(path.read_text(), 'old-' + label)
+            # A pre-upgrade backup has no entry for the new sixth component.
+            (backup / 'manifest').write_text(''.join(
+                f'{label} present\n' for label in targets if label != names[-1]))
+            missing.unlink()
+            result = self.execute(commands, env)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse((dest / names[-1]).exists())
 
     def test_trusted_path_rejects_writable_mode(self):
         # Emulate FreeBSD stat to exercise permission decisions on any POSIX host.

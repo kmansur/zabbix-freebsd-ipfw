@@ -105,8 +105,8 @@ validate_response() {
 m=re.search(r"\[[ts]\|(.*)\]\s*$",os.environ["RESPONSE"],re.S)
 try:
  d=json.loads(m.group(1)) if m else None
- assert isinstance(d,dict)
- assert (isinstance(d.get("data"),list) if sys.argv[1]=="ipfw.tables.discovery" else d.get("status")==1)
+ if not isinstance(d,dict): raise ValueError("Expected object")
+ if not (isinstance(d.get("data"),list) if sys.argv[1]=="ipfw.tables.discovery" else d.get("status")==1): raise ValueError("Unhealthy response")
 except (ValueError,AssertionError): sys.exit(1)' "$key"
 }
 preflight() {
@@ -151,9 +151,17 @@ backup_file() {
     printf '%s absent\n' "$label" >> "$BACKUP/manifest"
   fi
 }
+backup_state() {
+  state=$(awk -v k="$1" '$1==k && NF==2 {print $2}' "$2/manifest")
+  # Backups from the five-component installer predate this collector.
+  if [ -z "$state" ] && [ "$1" = ipfw_tables_collect.py ] && [ "$(wc -l < "$2/manifest" | tr -d ' ')" = 8 ]; then
+    state=absent
+  fi
+  printf '%s\n' "$state"
+}
 restore_file() {
   label=$1; path=$2; dir=$3
-  state=$(awk -v k="$label" '$1==k {print $2}' "$dir/manifest")
+  state=$(backup_state "$label" "$dir")
   case "$state" in
     present)
       temp=$(mktemp "$path.restore.XXXXXXXX") || fail 'Falha no temporario'
@@ -173,9 +181,9 @@ rollback() {
   case "$original_param" in /usr/local/etc/zabbix7/*/userparameter_ipfw.conf) ;; *) fail 'Destino do backup invalido';; esac
   # Prevalidate the entire manifest and every source/destination before mutation.
   [ "$(wc -l < "$dir/paths" | tr -d ' ')" = 2 ] || fail 'Paths invalido'
-  [ "$(wc -l < "$dir/manifest" | tr -d ' ')" = 9 ] || fail 'Manifesto invalido'
+  case "$(wc -l < "$dir/manifest" | tr -d ' ')" in 8|9) ;; *) fail 'Manifesto invalido';; esac
   for label in agent userparameter sudoers $FILES; do
-    state=$(awk -v k="$label" '$1==k && NF==2 {print $2}' "$dir/manifest")
+    state=$(backup_state "$label" "$dir")
     case "$state" in
       present) [ -f "$dir/$label" ] || fail "Backup incompleto: $label"; trusted_path "$dir/$label" ;;
       absent) ;;

@@ -60,8 +60,8 @@ agent_key() {
 m=re.search(r"\[[ts]\|(.*)\]\s*$",os.environ["RESPONSE"],re.S)
 try:
  d=json.loads(m.group(1)) if m else None
- assert isinstance(d,dict)
- assert (isinstance(d.get("data"),list) if sys.argv[1]=="ipfw.tables.discovery" else d.get("status")==1)
+ if not isinstance(d,dict): raise ValueError("Expected object")
+ if not (isinstance(d.get("data"),list) if sys.argv[1]=="ipfw.tables.discovery" else d.get("status")==1): raise ValueError("Unhealthy response")
 except (ValueError,AssertionError): sys.exit(1)' "$key"; then
           ok "agent key supported: $key"
         else bad "invalid or unhealthy JSON: $key"; fi
