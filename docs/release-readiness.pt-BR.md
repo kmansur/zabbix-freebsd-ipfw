@@ -4,7 +4,7 @@
 
 ## Escopo e atualização
 
-O projeto monitora totais de regras, tráfego negado agregado, descoberta/contagem de tabelas e inventário textual de hosts/CIDR. Não calcula política efetiva nem descobre regras individuais. Inclui gráficos e o dashboard nativo Sentinel com três páginas.
+O projeto monitora totais de regras, tráfego negado agregado, descoberta/contagem de tabelas e inventário textual de hosts/CIDR. Não calcula política efetiva nem descobre regras individuais. Inclui gráficos e o dashboard nativo IPFW com três páginas.
 
 Atualize coletores e UserParameters antes de importar o template. É necessária a chave `ipfw.tables.raw`, o script `ipfw_tables_collect.py` pertencente a root e sua regra sudoers. Execute o instalador, confirme reinício com `YES` e importe atualizando itens, descoberta e protótipos. Exporte separadamente o template do servidor: o instalador local não o restaura.
 

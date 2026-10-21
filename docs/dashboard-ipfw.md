@@ -1,6 +1,6 @@
-English | [Português](dashboard-sentinela.pt-BR.md)
+English | [Português](dashboard-ipfw.pt-BR.md)
 
-# Sentinel | IPFW
+# IPFW
 
 Native template dashboard with three pages and host-relative references. No Grafana, additional web service, frontend CSS installation or collector reinstallation is required.
 
@@ -20,10 +20,10 @@ OK means successful collection, not absence of incidents or proof of firewall po
 
 1. Export the existing template as a backup. Review the import comparison if you have local customizations.
 2. Import `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml`. Allow creation/update of template dashboards, value maps and graphs, along with the normal item/discovery updates.
-3. Open **Monitoring → Hosts → Dashboards → Sentinel | IPFW**. Paths may vary with frontend translation.
+3. Open **Monitoring → Hosts → Dashboards → IPFW**. Paths may vary with frontend translation.
 4. Inspect all pages, collection timestamps and discovered-table graphs, starting with a one-hour window.
 
-The dashboard UUID is preserved when renaming Sentinela to Sentinel. Reimport updates the existing dashboard rather than requiring deletion. Stored keys, collector output and numeric trigger expressions are unchanged. Health display mappings are `0 → FAILED`, `1 → OK`.
+The dashboard UUID is preserved when renaming IPFWa to IPFW. Reimport updates the existing dashboard rather than requiring deletion. Stored keys, collector output and numeric trigger expressions are unchanged. Health display mappings are `0 → FAILED`, `1 → OK`.
 
 ## Verification
 

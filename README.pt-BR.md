@@ -111,9 +111,9 @@ O instalador **não** remove o template no servidor Zabbix. Não há homologaç�
 
 A coleta de tabelas agora usa `ipfw.tables.raw`, o novo componente `ipfw_tables_collect.py` e itens dependentes. Atualize os coletores/UserParameters com o instalador e reinicie o agente antes de importar os templates. Veja [preparação e critérios de aceite](docs/release-readiness.pt-BR.md): inclui timeouts, testes e as validações operacionais ainda necessárias. O projeto continua como prévia até homologação real.
 
-## Dashboard Sentinel
+## Dashboard IPFW
 
-O template inclui o painel nativo **Sentinel | IPFW**, com páginas de operação, inventário textual e tabelas descobertas. Veja [como importar e acessar](docs/dashboard-sentinela.pt-BR.md). Não é necessário reinstalar os coletores para adicionar o dashboard.
+O template inclui o painel nativo **IPFW**, com páginas de operação, inventário textual e tabelas descobertas. Veja [como importar e acessar](docs/dashboard-ipfw.pt-BR.md). Não é necessário reinstalar os coletores para adicionar o dashboard.
 
 
 A interface e as mensagens de execução ficam em inglês. Consulte o [índice bilíngue](docs/README.pt-BR.md). A confirmação do instalador atual é `YES` (padrão: não); versões antigas podem pedir `SIM`.

@@ -7,7 +7,7 @@ Dashboard, templates, rótulos de status, mensagens do instalador e confirmaçã
 | Assunto | English | Português |
 |---|---|---|
 | Instalação | [README](../README.md) | [README](../README.pt-BR.md) |
-| Dashboard | [Sentinel](dashboard-sentinela.md) | [Sentinel](dashboard-sentinela.pt-BR.md) |
+| Dashboard | [IPFW](dashboard-ipfw.md) | [IPFW](dashboard-ipfw.pt-BR.md) |
 | Homologação | [Checklist](homologation-0.1.5.md) | [Checklist](homologation-0.1.5.pt-BR.md) |
 | Release | [Readiness](release-readiness.md) | [Preparação](release-readiness.pt-BR.md) |
 | Inventário | [Duplicate detection](duplicate-detection.md) | [Duplicidades](duplicate-detection.pt-BR.md) |
