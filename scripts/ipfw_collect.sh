@@ -20,7 +20,8 @@ fi
 rules_json=$(printf '%s\n' "$output" | "$AWK" '
 function num(x) { return x ~ /^[0-9]+$/ }
 {
-  if (NF < 4 || !num($1) || !num($2) || !num($3)) next
+  if (!NF) next
+  if (NF < 4 || !num($1) || !num($2) || !num($3)) {invalid=1; next}
   action=tolower($4)
   rules++
   if (action == "allow" || action == "accept" || action == "pass") allowed++
@@ -36,7 +37,7 @@ function num(x) { return x ~ /^[0-9]+$/ }
   }
 }
 END {
-  if (rules == 0) {
+  if (rules == 0 || invalid) {
     print "{\"status\":0,\"error\":\"No parseable IPFW rules\"}"
     exit 0
   }
@@ -47,14 +48,17 @@ END {
 if table_info=$("$IPFW" table all info 2>/dev/null); then
   table_metrics=$(printf '%s\n' "$table_info" | "$AWK" '
     /^--- table\(/ {
+      if ($0 !~ /^--- table\([a-zA-Z0-9_.-]+\), set\([0-9]+\) ---$/) invalid=1
       id=$0
       sub(/^--- table\(/, "", id)
       sub(/\).*/, "", id)
       tables++
       next
     }
+    NF && tables == 0 {invalid=1}
     END {
-      printf "\"tables_status\":1,\"tables_total\":%d", tables
+      if (invalid) printf "\"tables_status\":0"
+      else printf "\"tables_status\":1,\"tables_total\":%d", tables
     }
   ')
 else

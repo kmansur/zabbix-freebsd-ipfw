@@ -1,0 +1,22 @@
+name: FreeBSD native checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  freebsd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run regression suite inside FreeBSD 14.3
+        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1
+        with:
+          release: '14.3'
+          usesh: true
+          prepare: pkg install -y python312 py312-yaml
+          run: |
+            set -eu
+            python3.12 -m unittest discover -s tests -p 'test_*.py' -v
+            # Never load IPFW or modify firewall policy in this job.

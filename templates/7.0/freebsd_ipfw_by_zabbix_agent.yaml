@@ -61,6 +61,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.rules_total'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: rules
@@ -75,6 +76,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.rules_deny'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: rules
@@ -89,6 +91,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.rules_allow'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: rules
@@ -103,6 +106,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.rules_reject'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: rules
@@ -117,6 +121,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.deny_packets'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: traffic
@@ -132,6 +137,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.deny_bytes'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: traffic
@@ -146,9 +152,15 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.tables_status'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: tables
+          triggers:
+            - uuid: 3fd6a8ad859c46d8a364b85ac009ae43
+              expression: 'last(/FreeBSD IPFW by Zabbix Agent/ipfw.tables.status)=0'
+              name: 'IPFW: Table collection failed'
+              priority: WARNING
         - uuid: 30c0638d131443249eb21387a9172aa6
           name: 'IPFW: Number of tables'
           type: DEPENDENT
@@ -160,6 +172,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.tables_total'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: tables
@@ -176,6 +189,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.deny_packets'
+              error_handler: DISCARD_VALUE
             - type: CHANGE_PER_SECOND
           tags:
             - tag: component
@@ -193,6 +207,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.deny_bytes'
+              error_handler: DISCARD_VALUE
             - type: CHANGE_PER_SECOND
           tags:
             - tag: component
@@ -242,6 +257,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.host_unique'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: inventory
@@ -256,6 +272,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.host_duplicate_extra'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: inventory
@@ -270,6 +287,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.host_occurrences'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: inventory
@@ -284,6 +302,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.prefix_unique'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: inventory
@@ -298,6 +317,7 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.prefix_occurrences'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: inventory
@@ -312,15 +332,51 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.prefix_duplicate_extra'
+              error_handler: DISCARD_VALUE
           tags:
             - tag: component
               value: inventory
+        - uuid: f27d55bdad7a49c4b8667bd5e3af4ba1
+          name: 'IPFW: Table metadata JSON'
+          type: ZABBIX_PASSIVE
+          key: ipfw.tables.raw
+          delay: 5m
+          history: 1d
+          value_type: TEXT
+          triggers:
+            - uuid: 2edbf9acb11840aaacebe3785c974f92
+              expression: 'nodata(/FreeBSD IPFW by Zabbix Agent/ipfw.tables.raw,15m)=1'
+              name: 'IPFW: Table metadata not received for 15 minutes'
+              priority: WARNING
+        - uuid: 89f55049eb19459380ea879a785685cb
+          name: 'IPFW: Table metadata status'
+          type: DEPENDENT
+          key: ipfw.tables.metadata.status
+          delay: '0'
+          master_item:
+            key: ipfw.tables.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.status'
+          triggers:
+            - uuid: 349887a0b05f4a3c85676350637ff629
+              expression: 'last(/FreeBSD IPFW by Zabbix Agent/ipfw.tables.metadata.status)=0'
+              name: 'IPFW: Table metadata collection failed'
+              priority: WARNING
       discovery_rules:
         - uuid: 8fd0794f3fbb4f8f978731ec37e3d0e1
           name: 'IPFW: Discover address tables'
-          type: ZABBIX_PASSIVE
+          type: DEPENDENT
           key: ipfw.tables.discovery
-          delay: 1h
+          delay: '0'
+          master_item:
+            key: ipfw.tables.raw
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data'
+              error_handler: DISCARD_VALUE
           filter:
             evaltype: AND
             conditions:
@@ -330,9 +386,16 @@ zabbix_export:
           item_prototypes:
             - uuid: 53164ce0308f4a39b40ed7a68ebd9a74
               name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
-              type: ZABBIX_PASSIVE
+              type: DEPENDENT
               key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
-              delay: 5m
+              delay: '0'
+              master_item:
+                key: ipfw.tables.raw
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - "$.entries['{#TABLE_SET}:{#TABLE_ID}']"
+                  error_handler: DISCARD_VALUE
               history: 30d
               trends: 365d
               tags:

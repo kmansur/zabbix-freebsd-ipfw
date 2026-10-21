@@ -12,6 +12,15 @@ KIND=
 FAIL=0
 ok() { printf 'PASS %s\n' "$1"; }
 bad() { printf 'FAIL %s\n' "$1"; FAIL=1; }
+trusted_path() {
+  check_path=$1
+  while [ "$check_path" != / ]; do
+    [ ! -L "$check_path" ] && [ "$(stat -f %u "$check_path" 2>/dev/null)" = 0 ] || return 1
+    mode=$(stat -f %OLp "$check_path" 2>/dev/null) || return 1
+    [ $((0$mode & 022)) -eq 0 ] || return 1
+    check_path=$(dirname "$check_path")
+  done
+}
 choose_agent() {
   if [ -n "$CONF" ]; then
     case "$CONF" in
@@ -45,9 +54,17 @@ agent_key() {
       bad "unsupported agent key: $key"; return ;;
   esac
   case "$key" in
-    ipfw.raw|ipfw.inventory.raw|ipfw.tables.discovery)
+    ipfw.raw|ipfw.inventory.raw|ipfw.tables.discovery|ipfw.tables.raw)
       if printf '%s\n' "$output" | /usr/bin/grep -Eq '\[[ts]\|\{'; then
-        ok "agent key supported: $key"
+        if RESPONSE="$output" "$PY" -c 'import json,os,re,sys
+m=re.search(r"\[[ts]\|(.*)\]\s*$",os.environ["RESPONSE"],re.S)
+try:
+ d=json.loads(m.group(1)) if m else None
+ assert isinstance(d,dict)
+ assert (isinstance(d.get("data"),list) if sys.argv[1]=="ipfw.tables.discovery" else d.get("status")==1)
+except (ValueError,AssertionError): sys.exit(1)' "$key"; then
+          ok "agent key supported: $key"
+        else bad "invalid or unhealthy JSON: $key"; fi
       else bad "unexpected agent key response: $key"; fi ;;
   esac
 }
@@ -56,16 +73,23 @@ if [ "$(id -u)" -ne 0 ]; then
 elif choose_agent; then
   SUDOERS=/usr/local/etc/sudoers.d/zabbix-ipfw
   DEST=/usr/local/scripts/zabbix
-  if [ -f "$SUDOERS" ] && visudo -cf "$SUDOERS" >/dev/null 2>&1; then ok 'sudoers syntax'; else bad 'sudoers missing or invalid'; fi
-  for name in ipfw_collect.sh ipfw_table_discovery.sh ipfw_table_entries.sh ipfw_inventory_collect.py ipfw_duplicate_inventory.py; do
+  if [ -f "$SUDOERS" ] && trusted_path "$SUDOERS" && visudo -cf /usr/local/etc/sudoers >/dev/null 2>&1; then ok 'sudoers syntax'; else bad 'sudoers missing or invalid'; fi
+  for name in ipfw_collect.sh ipfw_table_discovery.sh ipfw_table_entries.sh ipfw_inventory_collect.py ipfw_duplicate_inventory.py ipfw_tables_collect.py; do
     file="$DEST/$name"
-    if [ -f "$file" ] && [ -x "$file" ] && [ ! -L "$file" ] && [ "$(stat -f %Su "$file" 2>/dev/null)" = root ]; then
+    if [ -f "$file" ] && [ -x "$file" ] && trusted_path "$file"; then
       ok "root-owned executable: $name"
     else bad "unsafe or missing collector: $name"
     fi
   done
-  for key in ipfw.raw ipfw.tables.discovery ipfw.inventory.raw; do agent_key "$key"; done
   PY=$(command -v python3 2>/dev/null || true)
+  if [ -z "$PY" ]; then
+    for candidate in /usr/local/bin/python3.14 /usr/local/bin/python3.13 /usr/local/bin/python3.12 /usr/local/bin/python3.11; do
+      if [ -x "$candidate" ]; then PY=$candidate; break; fi
+    done
+  fi
+  if [ -n "$PY" ]; then
+    for key in ipfw.raw ipfw.tables.discovery ipfw.inventory.raw ipfw.tables.raw; do agent_key "$key"; done
+  else bad "Python 3 unavailable for JSON validation"; fi
   if [ -n "$PY" ] && [ -x "$DEST/ipfw_inventory_collect.py" ]; then
     root_json=$("$DEST/ipfw_inventory_collect.py" 2>/dev/null) || root_json=
     sudo_json=$(su -m zabbix -c '/usr/local/bin/sudo -n /usr/local/scripts/zabbix/ipfw_inventory_collect.py' 2>/dev/null) || sudo_json=

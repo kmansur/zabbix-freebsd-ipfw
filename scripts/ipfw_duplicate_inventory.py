@@ -13,7 +13,8 @@ from collections import Counter
 from pathlib import Path
 
 RULE = re.compile(r"^\s*\d+\s+\d+\s+\d+\s+(deny|drop|reject|reset|unreach)\b(.*)$", re.I)
-SOURCE = re.compile(r"\bfrom\s+(\S+)\s+to\s+", re.I)
+SOURCE = re.compile(r"\bfrom\s+(\S+)(?:\s+[0-9A-Za-z_,:.-]+)?\s+to\s+", re.I)
+RULE_LINE = re.compile(r"^\s*\d+\s+\d+\s+\d+\s+[a-z][a-z0-9-]*\b", re.I)
 TABLE_REF = re.compile(r"^table\(([a-zA-Z0-9_.-]+)\)$", re.I)
 TABLE_HEAD = re.compile(r"^--- table\(([a-zA-Z0-9_.-]+)\), set\((\d+)\) ---$")
 HOST_OR_PREFIX = re.compile(r"^([^\s]+)(?:\s+.*)?$")
@@ -37,7 +38,14 @@ def summarize(rules, tables):
     entries = []
     unsupported = 0
 
+    valid_rules = 0
     for line in rules.splitlines():
+        if not line.strip():
+            continue
+        if not RULE_LINE.match(line):
+            unsupported += 1
+            continue
+        valid_rules += 1
         match = RULE.match(line)
         if not match:
             continue
@@ -57,6 +65,9 @@ def summarize(rules, tables):
                 unsupported += 1
             else:
                 entries.append(value)
+
+    if not valid_rules:
+        unsupported += 1
 
     headers = set()
     current = None
@@ -78,6 +89,8 @@ def summarize(rules, tables):
         if current is None:
             # A nonempty, non-header table listing cannot safely be decoded.
             unsupported += 1
+            continue
+        if current[0] not in references:
             continue
         token = stripped.split()[0]
         value = normalize(token)
