@@ -59,9 +59,9 @@ For operational acceptance, follow [homologation checklist](docs/homologation-0.
 
 See [release readiness](docs/release-readiness.md) for the new consolidated table collector, upgrade order, timeout settings, regression coverage and remaining operational acceptance gates. CI now includes a disposable FreeBSD VM; it never modifies firewall policy. Live frontend import and service acceptance remain separate requirements.
 
-## Sentinel dashboard
+## IPFW dashboard
 
-A native three-page dashboard provides operations, textual inventory and discovered-table views. See the [dashboard guide](docs/dashboard-sentinela.md) for design, import and interpretation.
+A native three-page dashboard provides operations, textual inventory and discovered-table views. See the [dashboard guide](docs/dashboard-ipfw.md) for design, import and interpretation.
 
 
 Language policy: runtime/UI text is English; documentation is bilingual. See the [documentation index](docs/README.md). Installer confirmation: `YES` (default: no).

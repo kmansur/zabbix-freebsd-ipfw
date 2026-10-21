@@ -5,7 +5,7 @@
 ## Não lançado
 
 - Interface e mensagens de execução em inglês; documentação em inglês e português. Confirmação do instalador alterada para `YES`; UUIDs e chaves preservados.
-- Dashboard nativo Sentinel com páginas de operação, inventário textual e atlas de tabelas, status legíveis e cores consistentes.
+- Dashboard nativo IPFW com páginas de operação, inventário textual e atlas de tabelas, status legíveis e cores consistentes.
 - Corrigidos JSON text/string do agente, Includes equivalentes e validação dos caminhos confiáveis.
 - Reforçados validação dos backups e substituição atômica de cada arquivo restaurado.
 - Corrigidos sucesso falso do inventário e falha causada por tabelas não referenciadas.

@@ -421,14 +421,14 @@ zabbix_export:
                     key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
       dashboards:
       - uuid: 2de13e9f8b9c40b68012e8f92a8a0f4c
-        name: Sentinel | IPFW
+        name: IPFW
         display_period: '30'
         auto_start: 'NO'
         pages:
         - name: Operations
           widgets:
           - type: item
-            name: 01 | Rule collection
+            name: Rule collection
             x: '0'
             y: '0'
             width: '18'
@@ -450,7 +450,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: 01 | Rule collection
+              value: Rule collection
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -488,7 +488,7 @@ zabbix_export:
               name: thresholds.1.threshold
               value: '1'
           - type: item
-            name: 02 | Inventory
+            name: Inventory
             x: '18'
             y: '0'
             width: '18'
@@ -510,7 +510,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: 02 | Inventory
+              value: Inventory
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -548,7 +548,7 @@ zabbix_export:
               name: thresholds.1.threshold
               value: '1'
           - type: item
-            name: 03 | Table collection
+            name: Table collection
             x: '36'
             y: '0'
             width: '18'
@@ -570,7 +570,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: 03 | Table collection
+              value: Table collection
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -608,7 +608,7 @@ zabbix_export:
               name: thresholds.1.threshold
               value: '1'
           - type: item
-            name: 04 | Total rules
+            name: Total rules
             x: '54'
             y: '0'
             width: '18'
@@ -630,7 +630,7 @@ zabbix_export:
               value: '3'
             - type: STRING
               name: description
-              value: 04 | Total rules
+              value: Total rules
             - type: STRING
               name: desc_color
               value: CBD5E1
@@ -800,7 +800,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: graph
-            name: 01 / Denied packet rate
+            name: Denied packet rate
             x: '0'
             y: '7'
             width: '36'
@@ -812,7 +812,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Denied packets per second'
           - type: graph
-            name: 02 / Denied traffic rate
+            name: Denied traffic rate
             x: '36'
             y: '7'
             width: '36'
@@ -824,7 +824,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Denied traffic (bytes per second)'
           - type: graph
-            name: 03 / Rule composition
+            name: Rule composition
             x: '0'
             y: '12'
             width: '36'
@@ -836,7 +836,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Firewall rules by action'
           - type: graph
-            name: 04 / Table count over time
+            name: Table count over time
             x: '36'
             y: '12'
             width: '36'
@@ -1042,7 +1042,7 @@ zabbix_export:
               name: time_size
               value: '10'
           - type: graph
-            name: 01 / Host sources | unique and repeated
+            name: Host sources | unique and repeated
             x: '0'
             y: '3'
             width: '36'
@@ -1054,7 +1054,7 @@ zabbix_export:
                 host: FreeBSD IPFW by Zabbix Agent
                 name: 'IPFW: Blocked host addresses and duplicates'
           - type: graph
-            name: 02 / CIDR sources | unique and repeated
+            name: CIDR sources | unique and repeated
             x: '36'
             y: '3'
             width: '36'

@@ -17,8 +17,8 @@ class DashboardChecks(unittest.TestCase):
                              ['Operations', 'Textual inventory', 'Table atlas'])
             names = [w['name'] for p in dashboard['pages'] for w in p['widgets']]
             self.assertIn('Flow | Denied traffic/s', names)
-            self.assertIn('03 / Rule composition', names)
-            self.assertIn('04 / Table count over time', names)
+            self.assertIn('Rule composition', names)
+            self.assertIn('Table count over time', names)
             for marker in ('\u00c3', '\u00c2', '\ufffd'):
                 self.assertNotIn(marker, text)
 

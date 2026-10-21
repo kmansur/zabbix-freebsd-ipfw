@@ -4,7 +4,7 @@ English | [Português](release-readiness.pt-BR.md)
 
 ## Scope and upgrade
 
-This project monitors rule totals, aggregate deny traffic, address-table discovery and counters, and textual blocked-source host/CIDR inventory. It does not compute effective policy. Per-rule discovery remains outside the current implementation. The YAML includes graphs and the three-page native Sentinel dashboard.
+This project monitors rule totals, aggregate deny traffic, address-table discovery and counters, and textual blocked-source host/CIDR inventory. It does not compute effective policy. Per-rule discovery remains outside the current implementation. The YAML includes graphs and the three-page native IPFW dashboard.
 
 Upgrade collectors and UserParameters **before** importing the updated template. The updated template requires `ipfw.tables.raw` and its root-owned `ipfw_tables_collect.py` sudo rule. Re-run the installer and confirm service restart, then import with update of existing items, discovery rules and prototypes enabled. Back up the server-side template separately: the host installer does not restore server configuration.
 

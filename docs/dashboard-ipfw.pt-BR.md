@@ -1,6 +1,6 @@
-[English](dashboard-sentinela.md) | Português
+[English](dashboard-ipfw.md) | Português
 
-# Sentinel | IPFW
+# IPFW
 
 Dashboard nativo do template, com três páginas e referências relativas ao host. Não precisa de Grafana, serviço web adicional, CSS instalado no frontend ou nova reinstalação dos coletores.
 
@@ -20,7 +20,7 @@ O estado OK significa sucesso da coleta, não ausência de incidentes nem garant
 
 1. Exporte seu template atual como backup. Se tiver personalizações locais, revise a comparação de importação antes de atualizar.
 2. Importe `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml`. Nas opções avançadas, permita criar/atualizar **dashboards de template**, **mapeamentos de valores** e **gráficos**. Mantenha os itens/regras conforme a atualização normal do template.
-3. Abra o host vinculado em **Monitoramento → Hosts → Dashboards** e escolha **Sentinel | IPFW**. O caminho exato pode variar com a tradução do frontend.
+3. Abra o host vinculado em **Monitoramento → Hosts → Dashboards** e escolha **IPFW**. O caminho exato pode variar com a tradução do frontend.
 4. Confira as três páginas, os horários de coleta e os gráficos das tabelas descobertas. Use uma janela de uma hora para começar.
 
 As chaves e coletores existentes são preservados. A apresentação de status recebe o mapeamento `0 → FAILED`, `1 → OK`; os valores armazenados e as expressões de trigger continuam numéricos.

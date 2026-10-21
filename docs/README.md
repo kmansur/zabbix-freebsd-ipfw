@@ -7,7 +7,7 @@ The dashboard, templates, status labels, installer messages and confirmation tok
 | Topic | English | Português |
 |---|---|---|
 | Setup | [README](../README.md) | [README](../README.pt-BR.md) |
-| Dashboard | [Sentinel](dashboard-sentinela.md) | [Sentinel](dashboard-sentinela.pt-BR.md) |
+| Dashboard | [IPFW](dashboard-ipfw.md) | [IPFW](dashboard-ipfw.pt-BR.md) |
 | Acceptance | [Checklist](homologation-0.1.5.md) | [Checklist](homologation-0.1.5.pt-BR.md) |
 | Release gates | [Readiness](release-readiness.md) | [Preparação](release-readiness.pt-BR.md) |
 | Inventory | [Duplicate detection](duplicate-detection.md) | [Duplicidades](duplicate-detection.pt-BR.md) |

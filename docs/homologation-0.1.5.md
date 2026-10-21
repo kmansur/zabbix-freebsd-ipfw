@@ -17,7 +17,7 @@ English | [Português](homologation-0.1.5.pt-BR.md)
 4. Test `ipfw.inventory.raw` with the installed agent and its actual configuration. Avoid duplicate UserParameters.
 5. Import `templates/7.0/freebsd_ipfw_by_zabbix_agent.yaml` into a Zabbix 7 laboratory, enabling item/prototype/graph/dashboard/value-map updates.
 6. Verify inventory status, unique hosts, occurrences and extra duplicates. Duplicates mean occurrences beyond the first of each normalized value.
-7. Check host and CIDR graphs and all three Sentinel dashboard pages.
+7. Check host and CIDR graphs and all three IPFW dashboard pages.
 8. Check discovery and graphs with tables and without tables. No tables is a valid healthy condition.
 9. Use synthetic snapshots for repeated IPs, IPv6, CIDR, invalid sources, missing tables and repeated table names across sets.
 10. Import `templates/8.0/freebsd_ipfw_by_zabbix_agent.yaml` into Zabbix 8 and repeat runtime checks. Static validation or a version header does not prove compatibility.
