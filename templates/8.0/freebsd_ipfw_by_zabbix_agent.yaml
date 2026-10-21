@@ -35,6 +35,8 @@ zabbix_export:
           name: 'IPFW: Collector status'
           type: DEPENDENT
           key: ipfw.status
+          valuemap:
+            name: IPFW collection health
           delay: '0'
           master_item:
             key: ipfw.raw
@@ -145,6 +147,8 @@ zabbix_export:
           name: 'IPFW: Table collection status'
           type: DEPENDENT
           key: ipfw.tables.status
+          valuemap:
+            name: IPFW collection health
           delay: '0'
           master_item:
             key: ipfw.raw
@@ -231,6 +235,8 @@ zabbix_export:
           name: 'IPFW: Blocked address inventory status'
           type: DEPENDENT
           key: ipfw.inventory.status
+          valuemap:
+            name: IPFW collection health
           delay: '0'
           master_item:
             key: ipfw.inventory.raw
@@ -352,6 +358,8 @@ zabbix_export:
           name: 'IPFW: Table metadata status'
           type: DEPENDENT
           key: ipfw.tables.metadata.status
+          valuemap:
+            name: IPFW collection health
           delay: '0'
           master_item:
             key: ipfw.tables.raw
@@ -407,10 +415,1011 @@ zabbix_export:
             - uuid: 99fc22a8b0cd4a61bf5ce6c3d66e07e2
               name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
               graph_items:
-                - color: 1A7C11
+                - color: 34D399
                   item:
                     host: 'FreeBSD IPFW by Zabbix Agent'
                     key: 'ipfw.table.set.entries[{#TABLE_ID},{#TABLE_SET}]'
+      dashboards:
+      - uuid: 2de13e9f8b9c40b68012e8f92a8a0f4c
+        name: Sentinela | IPFW
+        display_period: '30'
+        auto_start: 'NO'
+        pages:
+        - name: 01 / OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+          widgets:
+          - type: item
+            name: 01 | Coleta de regras
+            x: '0'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.status
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: 01 | Coleta de regras
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: F1F5F9
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+            - type: STRING
+              name: thresholds.0.color
+              value: 431D2A
+            - type: STRING
+              name: thresholds.0.threshold
+              value: '0'
+            - type: STRING
+              name: thresholds.1.color
+              value: 12382F
+            - type: STRING
+              name: thresholds.1.threshold
+              value: '1'
+          - type: item
+            name: 02 | InventÃƒÆ’Ã‚Â¡rio
+            x: '18'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.status
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: 02 | InventÃƒÆ’Ã‚Â¡rio
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: F1F5F9
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+            - type: STRING
+              name: thresholds.0.color
+              value: 431D2A
+            - type: STRING
+              name: thresholds.0.threshold
+              value: '0'
+            - type: STRING
+              name: thresholds.1.color
+              value: 12382F
+            - type: STRING
+              name: thresholds.1.threshold
+              value: '1'
+          - type: item
+            name: 03 | Coleta de tabelas
+            x: '36'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.tables.metadata.status
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: 03 | Coleta de tabelas
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: F1F5F9
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+            - type: STRING
+              name: thresholds.0.color
+              value: 431D2A
+            - type: STRING
+              name: thresholds.0.threshold
+              value: '0'
+            - type: STRING
+              name: thresholds.1.color
+              value: 12382F
+            - type: STRING
+              name: thresholds.1.threshold
+              value: '1'
+          - type: item
+            name: 04 | Regras totais
+            x: '54'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.rules.total
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: 04 | Regras totais
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: 38BDF8
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Pulso | Pacotes negados/s
+            x: '0'
+            y: '3'
+            width: '24'
+            height: '4'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.deny.pps
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Pulso | Pacotes negados/s
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: FBBF24
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '1'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Fluxo | TrÃƒÆ’Ã‚Â¡fego negado/s
+            x: '24'
+            y: '3'
+            width: '24'
+            height: '4'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.deny.bytes_per_second
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Fluxo | TrÃƒÆ’Ã‚Â¡fego negado/s
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: 38BDF8
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '1'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Estrutura | Tabelas
+            x: '48'
+            y: '3'
+            width: '24'
+            height: '4'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.tables.total
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Estrutura | Tabelas
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: C4B5FD
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: graph
+            name: 01 / Pulso de bloqueio
+            x: '0'
+            y: '7'
+            width: '36'
+            height: '5'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Denied packets per second'
+          - type: graph
+            name: 02 / Volume negado
+            x: '36'
+            y: '7'
+            width: '36'
+            height: '5'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Denied traffic (bytes per second)'
+          - type: graph
+            name: 03 / ComposiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o das regras
+            x: '0'
+            y: '12'
+            width: '36'
+            height: '5'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Firewall rules by action'
+          - type: graph
+            name: 04 / EvoluÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o das tabelas
+            x: '36'
+            y: '12'
+            width: '36'
+            height: '5'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Number of tables'
+        - name: 02 / InventÃƒÆ’Ã‚Â¡rio textual
+          widgets:
+          - type: item
+            name: Hosts ÃƒÆ’Ã‚Âºnicos nas fontes
+            x: '0'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.host.unique
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Hosts ÃƒÆ’Ã‚Âºnicos nas fontes
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: 38BDF8
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de hosts
+            x: '18'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.host.duplicates
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de hosts
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: FBBF24
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Prefixos ÃƒÆ’Ã‚Âºnicos nas fontes
+            x: '36'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.prefix.unique
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Prefixos ÃƒÆ’Ã‚Âºnicos nas fontes
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: C4B5FD
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de prefixos
+            x: '54'
+            y: '0'
+            width: '18'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.prefix.duplicates
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: RepetiÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes extras de prefixos
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: FBBF24
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: graph
+            name: 01 / Fontes de hosts | ÃƒÆ’Ã‚Âºnicas e repetidas
+            x: '0'
+            y: '3'
+            width: '36'
+            height: '6'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Blocked host addresses and duplicates'
+          - type: graph
+            name: 02 / Fontes CIDR | ÃƒÆ’Ã‚Âºnicas e repetidas
+            x: '36'
+            y: '3'
+            width: '36'
+            height: '6'
+            fields:
+            - type: GRAPH
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Blocked network prefixes and duplicates'
+          - type: item
+            name: OcorrÃƒÆ’Ã‚Âªncias de hosts
+            x: '0'
+            y: '9'
+            width: '24'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.host.occurrences
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: OcorrÃƒÆ’Ã‚Âªncias de hosts
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: 38BDF8
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: OcorrÃƒÆ’Ã‚Âªncias de prefixos
+            x: '24'
+            y: '9'
+            width: '24'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.prefix.occurrences
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: OcorrÃƒÆ’Ã‚Âªncias de prefixos
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: C4B5FD
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Integridade do inventÃƒÆ’Ã‚Â¡rio
+            x: '48'
+            y: '9'
+            width: '24'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.inventory.status
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Integridade do inventÃƒÆ’Ã‚Â¡rio
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: F1F5F9
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+            - type: STRING
+              name: thresholds.0.color
+              value: 431D2A
+            - type: STRING
+              name: thresholds.0.threshold
+              value: '0'
+            - type: STRING
+              name: thresholds.1.color
+              value: 12382F
+            - type: STRING
+              name: thresholds.1.threshold
+              value: '1'
+        - name: 03 / Atlas de tabelas
+          widgets:
+          - type: item
+            name: Tabelas encontradas
+            x: '0'
+            y: '0'
+            width: '24'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.tables.total
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Tabelas encontradas
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: C4B5FD
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+          - type: item
+            name: Leitura das tabelas
+            x: '24'
+            y: '0'
+            width: '24'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.tables.status
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Leitura das tabelas
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: F1F5F9
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+            - type: STRING
+              name: thresholds.0.color
+              value: 431D2A
+            - type: STRING
+              name: thresholds.0.threshold
+              value: '0'
+            - type: STRING
+              name: thresholds.1.color
+              value: 12382F
+            - type: STRING
+              name: thresholds.1.threshold
+              value: '1'
+          - type: item
+            name: Metadados da descoberta
+            x: '48'
+            y: '0'
+            width: '24'
+            height: '3'
+            fields:
+            - type: ITEM
+              name: itemid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                key: ipfw.tables.metadata.status
+            - type: INTEGER
+              name: show.0
+              value: '1'
+            - type: INTEGER
+              name: show.1
+              value: '2'
+            - type: INTEGER
+              name: show.2
+              value: '3'
+            - type: STRING
+              name: description
+              value: Metadados da descoberta
+            - type: STRING
+              name: desc_color
+              value: CBD5E1
+            - type: STRING
+              name: value_color
+              value: F1F5F9
+            - type: STRING
+              name: time_color
+              value: CBD5E1
+            - type: STRING
+              name: bg_color
+              value: '172536'
+            - type: INTEGER
+              name: decimal_places
+              value: '0'
+            - type: INTEGER
+              name: value_size
+              value: '40'
+            - type: INTEGER
+              name: desc_size
+              value: '13'
+            - type: INTEGER
+              name: time_size
+              value: '10'
+            - type: STRING
+              name: thresholds.0.color
+              value: 431D2A
+            - type: STRING
+              name: thresholds.0.threshold
+              value: '0'
+            - type: STRING
+              name: thresholds.1.color
+              value: 12382F
+            - type: STRING
+              name: thresholds.1.threshold
+              value: '1'
+          - type: graphprototype
+            name: Atlas | Entradas por tabela e set
+            x: '0'
+            y: '3'
+            width: '72'
+            height: '10'
+            fields:
+            - type: GRAPH_PROTOTYPE
+              name: graphid.0
+              value:
+                host: FreeBSD IPFW by Zabbix Agent
+                name: 'IPFW: Table {#TABLE_ID} entries (set {#TABLE_SET})'
+            - type: INTEGER
+              name: columns
+              value: '2'
+            - type: INTEGER
+              name: rows
+              value: '3'
+            - type: STRING
+              name: reference
+              value: TBL01
+      valuemaps:
+      - uuid: 2d5b9f0117e84687836417dcac7b51d1
+        name: IPFW collection health
+        mappings:
+        - value: '0'
+          newvalue: FALHA
+        - value: '1'
+          newvalue: OK
       tags:
         - tag: class
           value: security
@@ -420,62 +1429,62 @@ zabbix_export:
     - uuid: 8c18ac182f5149c5960a6213bec44da3
       name: 'IPFW: Firewall rules by action'
       graph_items:
-        - color: 1A7C11
+        - color: 34D399
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.rules.allow
         - sortorder: '1'
-          color: E53935
+          color: FBBF24
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.rules.deny
         - sortorder: '2'
-          color: FF9800
+          color: FB7185
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.rules.reject
     - uuid: c7569aebd5f24284b34b060e26721a75
       name: 'IPFW: Denied packets per second'
       graph_items:
-        - color: E53935
+        - color: FBBF24
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.deny.pps
     - uuid: a8ff42a89bfc4c8a9f6c67d710d43ba0
       name: 'IPFW: Denied traffic (bytes per second)'
       graph_items:
-        - color: 1565C0
+        - color: 38BDF8
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.deny.bytes_per_second
     - uuid: 054c57dd76094ae98fbaef10512b24a7
       name: 'IPFW: Number of tables'
       graph_items:
-        - color: 7E57C2
+        - color: C4B5FD
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.tables.total
     - uuid: 5b0b0e8a631a4fa39307831312a8ad35
       name: 'IPFW: Blocked host addresses and duplicates'
       graph_items:
-        - color: 1A7C11
+        - color: 34D399
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.host.unique
         - sortorder: '1'
-          color: E53935
+          color: FBBF24
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.host.duplicates
     - uuid: 8c1c1cb2eeb0417b8fa063a0a0cbb8ab
       name: 'IPFW: Blocked network prefixes and duplicates'
       graph_items:
-        - color: 1565C0
+        - color: 38BDF8
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.prefix.unique
         - sortorder: '1'
-          color: FF9800
+          color: FB7185
           item:
             host: 'FreeBSD IPFW by Zabbix Agent'
             key: ipfw.inventory.prefix.duplicates

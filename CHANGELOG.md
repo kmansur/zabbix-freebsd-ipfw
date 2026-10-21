@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added the native Sentinela dashboard with operations, textual inventory and table-atlas pages, readable health labels and a consistent chart palette.
+
 - Fixed installer text/string JSON validation, equivalent Includes and trusted path checks.
 - Hardened backup prevalidation and atomic replacement of restored files.
 - Fixed healthy-zero inventory responses on malformed input and irrelevant-table failures.
