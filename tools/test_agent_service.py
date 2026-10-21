@@ -8,7 +8,6 @@ import contextlib
 import io
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 import time
@@ -21,9 +20,6 @@ def main():
     parser.add_argument('--image', required=True)
     parser.add_argument('--binary', required=True)
     args = parser.parse_args()
-    executable = shutil.which('zabbix_get')
-    if not executable:
-        raise RuntimeError('zabbix_get is required for the CI service test')
     raw = {'status': 1, 'rules_total': 7, 'rules_allow': 1, 'rules_deny': 2,
            'rules_reject': 3, 'rules_other': 1, 'deny_packets': 20, 'deny_bytes': 200,
            'reject_packets': 30, 'reject_bytes': 300}
@@ -36,6 +32,13 @@ def main():
 
     name = 'ipfw-runtime-ci'
     with tempfile.TemporaryDirectory() as td:
+        # The official classic-agent image bundles the matching zabbix_get client.
+        client_image = 'zabbix/zabbix-agent:alpine-7.0-latest'
+        subprocess.run(['docker', 'pull', client_image], check=True)
+        executable = str(Path(td) / 'zabbix_get')
+        Path(executable).write_text('#!/bin/sh\nexec docker run --rm --network host '
+                                    '--entrypoint /usr/bin/zabbix_get ' + client_image + ' "$@"\n')
+        Path(executable).chmod(0o755)
         config = Path(td) / 'agent.conf'
         base = ('LogType=console\nPidFile=/tmp/ipfw-ci.pid\nHostname=ipfw-ci\n'
                 'Server=0.0.0.0/0\nListenPort=10050\nTimeout=10\n')

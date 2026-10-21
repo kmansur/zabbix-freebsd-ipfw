@@ -18,7 +18,5 @@ jobs:
             binary: /usr/sbin/zabbix_agent2
     steps:
       - uses: actions/checkout@v4
-      - name: Install passive-query client
-        run: sudo apt-get update -qq && sudo apt-get install -y zabbix-get
       - name: Verify missing key and restart behavior against a real daemon
         run: python3 tools/test_agent_service.py --image '${{ matrix.image }}' --binary '${{ matrix.binary }}'
