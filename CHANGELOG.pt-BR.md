@@ -4,8 +4,8 @@
 
 ## Não lançado
 
-- Adicionados Other rules, contadores/taxas/graficos de rejeicao, macros por host, verificacao do agente em execucao e roteiro final bilingue.
-- Adicionados testes de servicos reais classico/Agent 2 para chave ausente, arquivo atualizado sem recarga e recuperacao apos reinicio.
+- Adicionados Other rules, contadores/taxas/gráficos de rejeição, macros por host, verificação do agente em execução e roteiro final bilíngue.
+- Adicionados testes de serviços reais clássico/Agent 2 para chave ausente, arquivo atualizado sem recarga e recuperação após reinício.
 
 
 - Interface e mensagens de execução em inglês; documentação em inglês e português. Confirmação do instalador alterada para `YES`; UUIDs e chaves preservados.

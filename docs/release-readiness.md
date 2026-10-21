@@ -2,6 +2,8 @@ English | [Português](release-readiness.pt-BR.md)
 
 # Release readiness
 
+For the current completion package (live-agent verification, Other rules, reject metrics and configurable discovery), follow the [upgrade and final validation runbook](final-validation.md). File installation can finish with runtime acceptance pending; consult the documented exit codes before assuming the running daemon was verified.
+
 ## Scope and upgrade
 
 This project monitors rule totals, aggregate deny traffic, address-table discovery and counters, and textual blocked-source host/CIDR inventory. It does not compute effective policy. Per-rule discovery remains outside the current implementation. The YAML includes graphs and the three-page native IPFW dashboard.

@@ -120,4 +120,4 @@ A interface e as mensagens de execução ficam em inglês. Consulte o [índice b
 
 ## Melhorias e aceite final
 
-Other rules completa as categorias; contadores e taxas de rejeicao estao disponiveis no dashboard IPFW. Macros por host configuram intervalos, janelas de ausencia de dados e filtros de nome/set. A instalacao consulta o agente em execucao com zabbix_get e informa aceite pendente explicitamente. Atualize os coletores antes de importar o template. Siga o [roteiro final](docs/final-validation.pt-BR.md) para ordem, macros, codigos de saida e testes de laboratorio.
+Other rules completa as categorias; contadores e taxas de rejeição estão disponíveis no dashboard IPFW. Macros por host configuram intervalos, janelas de ausência de dados e filtros de nome/set. A instalação consulta o agente em execução com zabbix_get e informa aceite pendente explicitamente. Atualize os coletores antes de importar o template. Siga o [roteiro final](docs/final-validation.pt-BR.md) para ordem, macros, códigos de saída e testes de laboratório.
